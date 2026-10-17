@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pip&#x27;s Peak Course</title>
-<meta name="description" content="Make a complete platformer in TIC-80, in 20 lessons.">
+<meta name="description" content="Make a complete platformer in TIC-80.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Silkscreen&display=swap">
@@ -494,7 +494,7 @@ details.example .shot img { max-width: 480px; }
 </style>
 <div class="layout" data-course="Pip&#x27;s Peak Course">
   <nav class="rail" aria-label="Lessons">
-    <a class="brand" href="#start"><span class="logo">PIP&#x27;S PEAK</span><span class="sub">a TIC-80 platformer in 20 lessons</span></a>
+    <a class="brand" href="#start"><span class="logo">PIP&#x27;S PEAK</span><span class="sub">a TIC-80 platformer</span></a>
     <button class="rail-toggle" type="button" aria-expanded="false">Lessons</button>
     <ol class="parts">
       <li class="part"><span>Before you start</span><ol><li><a href="#start"><span class="num">·</span> How this course works</a></li></ol></li>
@@ -503,7 +503,7 @@ details.example .shot img { max-width: 480px; }
   </nav>
   <main>
     <section class="lesson" id="start">
-<header class="lesson-head"><p class="eyebrow">Before you start</p><h2>How this course works</h2><p class="summary">Build Pip's Peak, a platformer with four levels, enemies, power-ups, music and a boss, in TIC-80.</p></header><div class="body"><figure class="play-embed" data-src="play/player.html?cart=lesson20&amp;autostart=1"><div class="screen"><img src="media/poster-20.png" alt="Pip's Peak, the finished game, before it runs" loading="lazy"><button type="button" class="play-btn">▶ Play Pip's Peak</button></div><figcaption>The finished game: four levels, King Glob, and everything in between. Click the game first; then the arrow keys move and <kbd>Z</kbd> jumps (<kbd>Down</kbd>+<kbd>Z</kbd> drops through thin platforms). By lesson 20 you will have made every pixel, sound and line of code in it. <a href="play/player.html?cart=lesson20" target="_blank" rel="noopener">Open it in a new tab</a>.</figcaption></figure>
+<header class="lesson-head"><p class="eyebrow">Before you start</p><h2>How this course works</h2><p class="summary">Build Pip's Peak, a platformer with four levels, enemies, power-ups, music and a boss, in TIC-80.</p></header><div class="body"><figure class="play-embed" data-src="play/player.html?cart=lesson20&amp;autostart=1"><div class="screen"><img src="media/poster-20.png" alt="Pip's Peak, the finished game, before it runs" loading="lazy"><button type="button" class="play-btn">▶ Play Pip's Peak</button></div><figcaption>The finished game: four levels, King Glob, and everything in between. Click the game first; then the arrow keys move and <kbd>Z</kbd> jumps (<kbd>Down</kbd>+<kbd>Z</kbd> drops through thin platforms). By the last lesson you will have made every pixel, sound and line of code in it. <a href="play/player.html?cart=lesson20" target="_blank" rel="noopener">Open it in a new tab</a>.</figcaption></figure>
 <p>Pip's Peak is a small platformer. Pip, a sprout with a leaf on its head, runs and jumps through a meadow, a crystal cave and a sky tower, collecting coins and gems, stomping slimes and dodging bats and turrets, until it reaches the throne room of King Glob.</p>
 <h3>What you need</h3>
 <ul><li><strong>TIC-80 1.3.1</strong>, a free fantasy computer, from <a href="https://tic80.com">tic80.com</a>. It is a whole studio in one program: a code editor, a sprite editor, a map editor, a sound editor and a music tracker. It runs on Windows, macOS, Linux and in a web browser.</li><li>A keyboard. TIC-80's buttons are the arrow keys and <kbd>Z</kbd> <kbd>X</kbd> <kbd>A</kbd> <kbd>S</kbd>; in this course <strong><kbd>Z</kbd> is the jump button</strong> (button "A").</li><li>No experience. The game is written in Lua, and each new idea is explained the first time it appears.</li></ul>
@@ -529,16 +529,16 @@ details.example .shot img { max-width: 480px; }
   <div class="body">
 <h3 id="l01-s1"><span class="step">Step 1</span> Start TIC-80</h3>
 <p>Download TIC-80 1.3.1 from <a href="https://tic80.com">tic80.com</a> and start it (or open it in your browser). After a short intro you land in the <strong>console</strong>: a black screen with a prompt.</p>
-<p>TIC-80 is a <em>fantasy computer</em>: a pretend games machine with tight, fixed limits. The screen is <strong>240 x 136 pixels</strong>, there are <strong>16 colors</strong> on screen at once, 4 sound channels, and every game fits in one <em>cart</em> file. The limits are the point: there is little to learn and you can finish a game.</p>
+<p>TIC-80 is a <em>fantasy computer</em>: a pretend games machine with tight, fixed limits. The screen is <strong>240 x 136 pixels</strong>, there are <strong>16 colors</strong> on screen at once, 4 sound channels, and every game fits in one <em>cart</em> file.</p>
 <figure class="editor"><div class="editor-pic"><img src="media/editor-console.png" alt="The console. Here it has just loaded a cart with load." loading="lazy" width="240" height="136"><span class="mark" style="left:9.17%;top:63.24%">1</span><span class="mark" style="left:66.67%;top:47.79%">2</span></div><figcaption>The console. Here it has just loaded a cart with load.</figcaption><ol class="legend"><li><span class="mark-inline">1</span><span>Type commands here and press <kbd>Enter</kbd>: <code>load</code>, <code>save</code>, <code>run</code>, <code>dir</code>, <code>cd</code>, <code>new</code>, <code>help</code>.</span></li><li><span class="mark-inline">2</span><span>TIC-80 answers below the command: here the cart was loaded.</span></li></ol></figure>
 <p>Type <code>help commands</code> and press <kbd>Enter</kbd> to see the list of commands. The ones you need:</p>
-<div class="table"><table><thead><tr><th>Command</th><th>Does</th></tr></thead><tbody><tr><td><code>new lua</code></td><td>Start a new cart that uses Lua (it comes with a small demo)</td></tr><tr><td><code>save pips-peak</code></td><td>Save the cart (in PRO: <code>save pips-peak.lua</code> saves it as text)</td></tr><tr><td><code>load pips-peak</code></td><td>Load a cart</td></tr><tr><td><code>run</code></td><td>Run the game (<kbd>Ctrl</kbd><kbd>R</kbd> does the same from anywhere)</td></tr><tr><td><code>dir</code>, <code>cd</code></td><td>List the files in the current folder, change folder</td></tr><tr><td><code>folder</code></td><td>Open the folder TIC-80 keeps your carts in</td></tr></tbody></table></div>
+<div class="table"><table><thead><tr><th>Command</th><th>Does</th></tr></thead><tbody><tr><td><code>new lua</code></td><td>Start a new cart that uses Lua (it comes with a small demo)</td></tr><tr><td><code>save pips-peak</code></td><td>Save the cart</td></tr><tr><td><code>load pips-peak</code></td><td>Load a cart</td></tr><tr><td><code>run</code></td><td>Run the game (<kbd>Ctrl</kbd><kbd>R</kbd> does the same from anywhere)</td></tr><tr><td><code>dir</code>, <code>cd</code></td><td>List the files in the current folder, change folder</td></tr><tr><td><code>folder</code></td><td>Open the folder TIC-80 keeps your carts in</td></tr></tbody></table></div>
 <p>Type <code>new lua</code>. TIC-80 creates a cart with a small demo program in it.</p>
 <h3 id="l01-s2"><span class="step">Step 2</span> Open the code editor</h3>
 <p>Press <kbd>F1</kbd> (or click the first tab at the top left). This is the <strong>code editor</strong>. A new cart already has a demo program; select all of it with <kbd>Ctrl</kbd><kbd>A</kbd> and delete it, because you will write your own.</p>
-<figure class="editor"><div class="editor-pic"><img src="media/editor-code.png" alt="The code editor, here with lesson 3&#x27;s code in it. (This is TIC-80 PRO: the free version&#x27;s size limit, shown at the bottom right, is 65536 characters instead of 524288.)" loading="lazy" width="240" height="136"><span class="mark" style="left:17.08%;top:2.21%">1</span><span class="mark" style="left:62.50%;top:27.21%">2</span><span class="mark" style="left:47.92%;top:96.32%">3</span></div><figcaption>The code editor, here with lesson 3's code in it. (This is TIC-80 PRO: the free version's size limit, shown at the bottom right, is 65536 characters instead of 524288.)</figcaption><ol class="legend"><li><span class="mark-inline">1</span><span>The editor tabs: code, sprites, map, sound effects, music. <kbd>F1</kbd> to <kbd>F5</kbd> switch between them; <kbd>Esc</kbd> goes back to the console.</span></li><li><span class="mark-inline">2</span><span>Your Lua code. Comments start with <code>--</code>.</span></li><li><span class="mark-inline">3</span><span>Cursor position, and how much of the code space the cart uses.</span></li></ol></figure>
+<figure class="editor"><div class="editor-pic"><img src="media/editor-code.png" alt="The code editor, here with lesson 3&#x27;s code in it." loading="lazy" width="240" height="136"><span class="mark" style="left:17.08%;top:2.21%">1</span><span class="mark" style="left:62.50%;top:27.21%">2</span><span class="mark" style="left:47.92%;top:96.32%">3</span></div><figcaption>The code editor, here with lesson 3's code in it.</figcaption><ol class="legend"><li><span class="mark-inline">1</span><span>The editor tabs: code, sprites, map, sound effects, music. <kbd>F1</kbd> to <kbd>F5</kbd> switch between them; <kbd>Esc</kbd> goes back to the console.</span></li><li><span class="mark-inline">2</span><span>Your Lua code. Comments start with <code>--</code>.</span></li><li><span class="mark-inline">3</span><span>Cursor position, and how much of the code space the cart uses.</span></li></ol></figure>
 <h3 id="l01-s3"><span class="step">Step 3</span> Write the game loop</h3>
-<p>Type this program in (or copy it with the <strong>Copy</strong> button and paste it with <kbd>Ctrl</kbd><kbd>V</kbd>):</p>
+<p>Type this program in (or copy it and paste it with <kbd>Ctrl</kbd><kbd>V</kbd>):</p>
 <figure class="code"><div class="code-label">lesson 1</div><button class="copy" type="button">Copy</button><pre><code><span class="c">-- title:   Pip&#x27;s Peak (lesson 1)</span>
 <span class="c">-- author:  TIC-80 Platformer Course</span>
 <span class="c">-- desc:    Meet TIC-80: the game loop</span>
@@ -573,8 +573,8 @@ t = <span class="n">0</span>
 <p>Then come three <strong>variables</strong>: <code>x</code> and <code>y</code>, the ball's position, and <code>t</code>, a frame counter. They are written outside any function and without the word <code>local</code>, which makes them <em>globals</em>: they keep their values from one frame to the next.</p>
 <p><code>TIC()</code> is the heart of every TIC-80 game. <strong>TIC-80 calls <code>TIC()</code> 60 times every second.</strong> Each call is one <em>frame</em>, and in each frame the game does the same three things:</p>
 <ol><li><strong>Read the buttons</strong> and change the variables: <code>btn(3)</code> is true while the right arrow is held, so <code>x</code> grows by one pixel every frame.</li><li><strong>Clear the screen</strong>, so the last frame's picture disappears.</li><li><strong>Draw everything again</strong> where it is now.</li></ol>
-<p>This is the <em>game loop</em>. Every game in this course, up to the boss fight, is this loop with more in it.</p>
-<p>Two pieces of Lua in it are worth a closer look:</p>
+<p>This is the <em>game loop</em>.</p>
+<p>Two pieces of Lua in it are new:</p>
 <ul><li><code>if btn(3) then x = x + 1 end</code> runs the part between <code>then</code> and <code>end</code> only when the condition is true. An <code>if</code> always needs its <code>end</code>; it can also span several lines.</li><li><code>&quot;frame &quot; .. t</code> joins two pieces of text: <code>..</code> turns the number <code>t</code> into text and puts it after <code>&quot;frame &quot;</code>.</li></ul>
 <h3 id="l01-s4"><span class="step">Step 4</span> Run it</h3>
 <p>Press <kbd>Ctrl</kbd><kbd>R</kbd>. Move the ball with the arrow keys. Press <kbd>Esc</kbd> to stop the game and come back to the editor.</p>
@@ -590,10 +590,10 @@ t = <span class="n">0</span>
 <figure class="palette"><ol><li><span class="sw" style="background:#1a1c2c"></span><b>0</b> <span>black</span><code>1a1c2c</code></li><li><span class="sw" style="background:#5d275d"></span><b>1</b> <span>purple</span><code>5d275d</code></li><li><span class="sw" style="background:#b13e53"></span><b>2</b> <span>red</span><code>b13e53</code></li><li><span class="sw" style="background:#ef7d57"></span><b>3</b> <span>orange</span><code>ef7d57</code></li><li><span class="sw" style="background:#ffcd75"></span><b>4</b> <span>yellow</span><code>ffcd75</code></li><li><span class="sw" style="background:#a7f070"></span><b>5</b> <span>lime</span><code>a7f070</code></li><li><span class="sw" style="background:#38b764"></span><b>6</b> <span>green</span><code>38b764</code></li><li><span class="sw" style="background:#257179"></span><b>7</b> <span>teal</span><code>257179</code></li><li><span class="sw" style="background:#29366f"></span><b>8</b> <span>navy</span><code>29366f</code></li><li><span class="sw" style="background:#3b5dc9"></span><b>9</b> <span>blue</span><code>3b5dc9</code></li><li><span class="sw" style="background:#41a6f6"></span><b>10</b> <span>sky</span><code>41a6f6</code></li><li><span class="sw" style="background:#73eff7"></span><b>11</b> <span>cyan</span><code>73eff7</code></li><li><span class="sw" style="background:#f4f4f4"></span><b>12</b> <span>white</span><code>f4f4f4</code></li><li><span class="sw" style="background:#94b0c2"></span><b>13</b> <span>silver</span><code>94b0c2</code></li><li><span class="sw" style="background:#566c86"></span><b>14</b> <span>gray</span><code>566c86</code></li><li><span class="sw" style="background:#333c57"></span><b>15</b> <span>slate</span><code>333c57</code></li></ol><figcaption>TIC-80's default palette, Sweetie 16: color numbers 0-15 (in the pixel rows, 10-15 are written a-f).</figcaption></figure>
 <p>Buttons are numbers too: <code>btn(0)</code> up, <code>btn(1)</code> down, <code>btn(2)</code> left, <code>btn(3)</code> right, <code>btn(4)</code> is button A (<kbd>Z</kbd>), <code>btn(5)</code> is B (<kbd>X</kbd>). TIC-80 has no names for them, so <code>btn(RIGHT)</code> does not work.</p>
 <aside class="tip">
-<p>The <a href="https://github.com/nesbox/TIC-80/wiki/API">API reference</a> lists every TIC-80 function with examples. You will meet about thirty of them in this course.</p>
+<p>The <a href="https://github.com/nesbox/TIC-80/wiki/API">API reference</a> lists every TIC-80 function with examples.</p>
 </aside>
 <h3 id="l01-s6"><span class="step">Step 6</span> Save your cart</h3>
-<p>Press <kbd>Esc</kbd> to go to the console and type <code>save pips-peak</code> (PRO: <code>save pips-peak.lua</code>). From now on <kbd>Ctrl</kbd><kbd>S</kbd> saves it under that name. You will add to this cart in every lesson.</p>
+<p>Press <kbd>Esc</kbd> to go to the console and type <code>save pips-peak</code>. From now on <kbd>Ctrl</kbd><kbd>S</kbd> saves it under that name. You will add to this cart in every lesson.</p>
 <section class="challenge"><h4><span class="tag">Challenge</span> Keep the ball on the screen</h4>
 <p>The ball can disappear off the edges. Make it stop at the edges instead.</p>
 <details class="hint"><summary>Hint</summary>
@@ -692,7 +692,7 @@ t = <span class="n">0</span>
 <ol><li>Click a color in the palette (it gets a white frame). Pip uses <strong>5</strong> lime for the leaf, <strong>6</strong> green, <strong>4</strong> yellow for the face, <strong>15</strong> slate for the eye (written <code>f</code> in the rows) and <strong>3</strong> orange for the feet.</li><li>Make sure the <strong>brush</strong> tool is selected (the first tool under the canvas).</li><li>Click the canvas to set pixels. Holding the button down draws while you move.</li></ol>
 <p>Here is the whole drawing, done in TIC-80's sprite editor the way artists often work: the outline first, in Pip's main color; the <strong>fill</strong> tool for the inside; then the face, the leaf, the feet and the eye on top. Watch the feet: one pixel lands in the wrong place, and <kbd>Ctrl</kbd><kbd>Z</kbd> takes it back.</p>
 <figure class="shot"><img src="media/draw-256.gif" alt="Drawing sprite 256: the outline, the fill, then the details, one color at a time. A slip on the feet is undone with Ctrl+Z." loading="lazy" width="240" height="136"><figcaption>Drawing sprite 256: the outline, the fill, then the details, one color at a time. A slip on the feet is undone with Ctrl+Z.</figcaption></figure>
-<p>The other tools help: the <strong>picker</strong> takes a color from the canvas, <strong>select</strong> lets you move part of the sprite, <strong>fill</strong> floods an area, and the next buttons flip, rotate or clear the sprite. <kbd>Ctrl</kbd><kbd>Z</kbd> undoes a mistake.</p>
+<p>The other tools help: the <strong>picker</strong> takes a color from the canvas, <strong>select</strong> lets you move part of the sprite, <strong>fill</strong> floods an area, and the next buttons flip, rotate or clear the sprite.</p>
 <aside class="tip">
 <p>Color 0 is special. When you draw a sprite, you can tell TIC-80 to skip one color so the background shows through. This course always skips color <strong>0</strong>, so empty pixels are see-through. Don't use color 0 inside a sprite unless you want a hole there.</p>
 </aside>
@@ -729,7 +729,7 @@ player = {x = <span class="n">116</span>, y = <span class="n">104</span>}
   <span class="a">spr</span>(PIP, player.x, player.y, <span class="n">0</span>)
 <span class="k">end</span></code></pre></figure>
 <p>Three new ideas:</p>
-<ul><li><strong>Constants.</strong> <code>local BTN_LEFT, BTN_RIGHT = 2, 3</code> gives the button numbers names, and <code>local PIP = 256</code> names the sprite. <code>local</code> means these names belong to this file only; we use it for values that never change. Names in capitals are a common way to say "this is a constant".</li><li><strong>A table.</strong> <code>player = {x = 116, y = 104}</code> groups the player's numbers in one variable. You read and change them as <code>player.x</code> and <code>player.y</code>. As the game grows, the player gets many more fields.</li><li><strong><code>spr(id, x, y, colorkey)</code></strong> draws sprite <code>id</code> with its top-left corner at x, y. The <code>colorkey</code> (here 0) is the transparent color.</li></ul>
+<ul><li><strong>Constants.</strong> <code>local BTN_LEFT, BTN_RIGHT = 2, 3</code> gives the button numbers names, and <code>local PIP = 256</code> names the sprite. <code>local</code> means these names belong to this file only; we use it for values that never change. Names in capitals are a common way to say "this is a constant".</li><li><strong>A table.</strong> <code>player = {x = 116, y = 104}</code> groups the player's numbers in one variable. You read and change them as <code>player.x</code> and <code>player.y</code>.</li><li><strong><code>spr(id, x, y, colorkey)</code></strong> draws sprite <code>id</code> with its top-left corner at x, y. The <code>colorkey</code> (here 0) is the transparent color.</li></ul>
 <p>Pip stands at y = 104 so that its feet touch the grass: the grass starts at 112, and a sprite is 8 pixels tall.</p>
 <h3 id="l02-s5"><span class="step">Step 5</span> Run it</h3>
 <p>Press <kbd>Ctrl</kbd><kbd>R</kbd> and walk Pip left and right.</p>
@@ -939,7 +939,7 @@ player = {x = <span class="n">116</span>, y = <span class="n">104</span>}
 <p>The <strong>Sprite Lab</strong> plays the animation while you draw: click a running frame, and the lab plays <code>ANIM_RUN</code> the way this lesson's game does. Change a pixel in one frame and watch the animation change.</p>
 <figure class="play-embed lab-embed" data-src="lab/lab.html?cart=lesson03&amp;mode=sprite&amp;sprite=258"><div class="screen"><img src="media/editor-sprite.png" alt="" loading="lazy"><button type="button" class="play-btn">▶ Open the Sprite Lab</button></div><figcaption>The <b>Sprite Lab</b>: the real TIC-80 sprite editor, with lesson 3's cart. It shows the cart's pictures by name, what the code calls them, animations playing, and what you changed. Change anything you like: <b>▶ Try it in the game</b> shows your change in the game, <b>Reset</b> puts it back, and <b>Save my sprites</b> gives you a cart with your version. <a href="lab/lab.html?cart=lesson03&amp;mode=sprite&amp;sprite=258" target="_blank" rel="noopener">Open it in a new tab</a>.</figcaption></figure>
 <h3 id="l03-s2"><span class="step">Step 2</span> Count the frames</h3>
-<p>Add a frame counter. It goes up by one every frame and works as the clock for all animations. Start from your lesson 2 code. Replace its constants (the single <code>PIP</code> constant is gone: Pip's sprites now come in lists) and add the counter; the new lines are marked:</p>
+<p>Add a frame counter. It goes up by one every frame and works as the clock for all animations. Start from your lesson 2 code. Replace its constants (the single <code>PIP</code> constant is gone: Pip's sprites now come in lists) and add the counter:</p>
 
 <figure class="code"><div class="code-label">lesson 3 · at the top, outside the functions · new lines marked</div><button class="copy" type="button">Copy</button><pre><code><span class="c">-- == Constants ==</span>
 <span class="k">local</span> BTN_LEFT, BTN_RIGHT = <span class="n">2</span>, <span class="n">3</span>     <span class="c">-- 0 is up, 1 is down</span>
@@ -1171,7 +1171,7 @@ t = <span class="n">0</span>   <span class="c">-- frame counter: animations use 
   <div class="body">
 <h3 id="l04-s1"><span class="step">Step 1</span> Look at the palette</h3>
 <p>TIC-80 shows 16 colors at a time, numbered 0 to 15. Every sprite pixel, tile and shape stores a <strong>color number</strong>, not a color. The palette says which actual color each number shows. So if you change palette color 6, everything green in the game changes at once: Pip, the grass, the bushes.</p>
-<p>This makes palettes powerful: a few changed colors make a cave darker, a sunset redder or an enemy flash, without redrawing anything.</p>
+<p>So a few changed colors can make a cave darker, a sunset redder or an enemy flash, without redrawing anything.</p>
 <figure class="palette"><ol><li><span class="sw" style="background:#1a1c2c"></span><b>0</b> <span>black</span><code>1a1c2c</code></li><li><span class="sw" style="background:#5d275d"></span><b>1</b> <span>purple</span><code>5d275d</code></li><li><span class="sw" style="background:#b13e53"></span><b>2</b> <span>red</span><code>b13e53</code></li><li><span class="sw" style="background:#ef7d57"></span><b>3</b> <span>orange</span><code>ef7d57</code></li><li><span class="sw" style="background:#ffcd75"></span><b>4</b> <span>yellow</span><code>ffcd75</code></li><li><span class="sw" style="background:#a7f070"></span><b>5</b> <span>lime</span><code>a7f070</code></li><li><span class="sw" style="background:#38b764"></span><b>6</b> <span>green</span><code>38b764</code></li><li><span class="sw" style="background:#257179"></span><b>7</b> <span>teal</span><code>257179</code></li><li><span class="sw" style="background:#29366f"></span><b>8</b> <span>navy</span><code>29366f</code></li><li><span class="sw" style="background:#3b5dc9"></span><b>9</b> <span>blue</span><code>3b5dc9</code></li><li><span class="sw" style="background:#41a6f6"></span><b>10</b> <span>sky</span><code>41a6f6</code></li><li><span class="sw" style="background:#73eff7"></span><b>11</b> <span>cyan</span><code>73eff7</code></li><li><span class="sw" style="background:#f4f4f4"></span><b>12</b> <span>white</span><code>f4f4f4</code></li><li><span class="sw" style="background:#94b0c2"></span><b>13</b> <span>silver</span><code>94b0c2</code></li><li><span class="sw" style="background:#566c86"></span><b>14</b> <span>gray</span><code>566c86</code></li><li><span class="sw" style="background:#333c57"></span><b>15</b> <span>slate</span><code>333c57</code></li></ol><figcaption>TIC-80's default palette, Sweetie 16: color numbers 0-15 (in the pixel rows, 10-15 are written a-f).</figcaption></figure>
 <h3 id="l04-s2"><span class="step">Step 2</span> Edit a color in the palette editor</h3>
 <p>In the sprite editor (<kbd>F2</kbd>), switch on the <strong>advanced view</strong> with the small button at the top left. A new button appears to the right of the palette: click it, and the tools are replaced by three sliders.</p>
@@ -1181,7 +1181,7 @@ t = <span class="n">0</span>   <span class="c">-- frame counter: animations use 
 <aside class="tip">
 <p>Changes you make here are saved in the cart, so the game always starts with them. The rest of this lesson changes colors <strong>while the game runs</strong>, which is how games make effects.</p>
 </aside>
-<p>Or try it in the <strong>Sprite Lab</strong>, which opens the palette editor on color 6 (green): drag its sliders and watch Pip change. Click any color under <strong>The palette</strong> to edit it. <strong>What you changed</strong> shows each color's old and new value, and <strong>Reset</strong> puts a color back (the editor's undo can't).</p>
+<p>Or try it in the <strong>Sprite Lab</strong>, which opens the palette editor on color 6 (green). Click any color under <strong>The palette</strong> to edit it. <strong>What you changed</strong> shows each color's old and new value, and <strong>Reset</strong> puts a color back (the editor's undo can't).</p>
 <figure class="play-embed lab-embed" data-src="lab/lab.html?cart=lesson04&amp;mode=palette&amp;color=6"><div class="screen"><img src="media/editor-palette.png" alt="" loading="lazy"><button type="button" class="play-btn">▶ Open the Sprite Lab</button></div><figcaption>The <b>Sprite Lab</b>: the real TIC-80 sprite editor, with lesson 4's cart. It shows the palette, the cart's pictures by name, and what you changed. Change anything you like: <b>▶ Try it in the game</b> shows your change in the game, <b>Reset</b> puts it back, and <b>Save my sprites</b> gives you a cart with your version. <a href="lab/lab.html?cart=lesson04&amp;mode=palette&amp;color=6" target="_blank" rel="noopener">Open it in a new tab</a>.</figcaption></figure>
 <h3 id="l04-s3"><span class="step">Step 3</span> Find the palette in memory</h3>
 <p>TIC-80 has 96 KB of memory (RAM), and parts of it have fixed jobs. The palette the screen uses lives at address <strong>0x3FC0</strong>: 16 colors x 3 bytes, red then green then blue. Color 0 is at 0x3FC0-0x3FC2, color 1 at 0x3FC3, and so on: color <em>i</em> starts at <code>0x3FC0 + i * 3</code>.</p>
@@ -1234,7 +1234,7 @@ t = <span class="n">0</span>   <span class="c">-- frame counter: animations use 
   <span class="k">end</span>
 <span class="k">end</span></code></pre></figure>
 <p><code>pairs(NIGHT)</code> goes through every entry of the table: <code>i</code> is the color number (10, 6 or 12), <code>rgb</code> its new color.</p>
-<p>Finally, toggle night with <kbd>Z</kbd> in <code>TIC()</code>. <code>btnp</code> is like <code>btn</code>, but true only on the frame the button goes <strong>down</strong>, so one press toggles once instead of 60 times a second:</p>
+<p>Toggle night with <kbd>Z</kbd> in <code>TIC()</code>. <code>btnp</code> is like <code>btn</code>, but true only on the frame the button goes <strong>down</strong>, so one press toggles once instead of 60 times a second:</p>
 <figure class="code"><div class="code-label">lesson 4 · replaces your TIC(); new lines marked</div><button class="copy" type="button">Copy</button><pre><code><span class="k">function</span> <span class="a">TIC</span>()
   t = t + <span class="n">1</span>
 <span class="add">  <span class="k">if</span> <span class="a">btnp</span>(BTN_A) <span class="k">then</span></span>
@@ -1258,7 +1258,7 @@ t = <span class="n">0</span>   <span class="c">-- frame counter: animations use 
 </aside>
 <figure class="play-embed" data-src="play/player.html?cart=lesson04&amp;autostart=1"><div class="screen"><img src="media/poster-04.png" alt="The finished lesson 4 cart, before it runs" loading="lazy"><button type="button" class="play-btn">▶ Run the lesson 4 cart</button></div><figcaption>What your cart should do at the end of this lesson. Click the game first; then the arrow keys, <kbd>Z</kbd> and <kbd>X</kbd> play it. <a href="play/player.html?cart=lesson04" target="_blank" rel="noopener">Open it in a new tab</a>.</figcaption></figure>
 <aside class="tip">
-<p>Lesson 5 removes this day/night code again: <kbd>Z</kbd> becomes the jump button. Changing palette memory comes back in lesson 17 (a flashing power-up) and lesson 20 (fading in from black).</p>
+<p>Lesson 5 removes this day/night code again: <kbd>Z</kbd> becomes the jump button.</p>
 </aside>
 <section class="challenge"><h4><span class="tag">Challenge</span> Sunset</h4>
 <p>Add a third look: press <kbd>Z</kbd> to go from day to sunset to night and back. Choose sunset colors for the sky (10) and grass (6).</p>
@@ -1502,9 +1502,9 @@ day_colors = {}   <span class="c">-- the cart&#x27;s own palette, saved in BOOT<
 <p>So far Pip's position changes by a fixed amount when you press a button. Jumping needs one more idea: <strong>velocity</strong>, how fast Pip is moving and in which direction. We store the vertical speed in <code>vy</code>, in pixels per frame. Negative is up (y grows downward), positive is down.</p>
 <p>Every frame:</p>
 <ol><li><strong>Gravity</strong> adds a little to <code>vy</code>: Pip falls faster and faster.</li><li><code>y</code> changes by <code>vy</code>.</li><li>If Pip went below the ground, put it back on the ground and stop it.</li></ol>
-<p>A jump is just setting <code>vy</code> to a big negative number. Gravity then slows the rise, stops it, and brings Pip back down: the arc comes for free.</p>
+<p>A jump is setting <code>vy</code> to a big negative number. Gravity then slows the rise, stops it, and brings Pip back down: the arc comes for free.</p>
 <h3 id="l05-s2"><span class="step">Step 2</span> Add the constants</h3>
-<p>The day/night code from lesson 4 has done its job: <strong>remove</strong> <code>get_color</code>, <code>set_color</code>, <code>apply_palette</code>, <code>NIGHT</code>, <code>night</code>, <code>day_colors</code>, <code>BOOT</code> and <code>PALETTE_ADDR</code>, and in <code>TIC</code> the <kbd>Z</kbd> check, the sun/moon line and the "Z: day/night" text (<kbd>Z</kbd> is about to become the jump button). The same palette tricks come back in lesson 17 and lesson 20. Then add these constants:</p>
+<p>The day/night code from lesson 4 has done its job: <strong>remove</strong> <code>get_color</code>, <code>set_color</code>, <code>apply_palette</code>, <code>NIGHT</code>, <code>night</code>, <code>day_colors</code>, <code>BOOT</code> and <code>PALETTE_ADDR</code>, and in <code>TIC</code> the <kbd>Z</kbd> check, the sun/moon line and the "Z: day/night" text (<kbd>Z</kbd> is about to become the jump button). Then add these constants:</p>
 <p>New and changed definitions outside the functions (constants, tables, variables): add these to your cart, or replace the old version of the same lines.</p><figure class="code"><div class="code-label">lesson 5</div><button class="copy" type="button">Copy</button><pre><code><span class="k">local</span> SPR_JUMP, SPR_FALL = <span class="n">262</span>, <span class="n">263</span></code></pre></figure>
 <figure class="code"><div class="code-label">lesson 5 · at the top, outside the functions</div><button class="copy" type="button">Copy</button><pre><code><span class="add"><span class="k">local</span> GROUND_Y = <span class="n">104</span>    <span class="c">-- Pip stands here (the grass starts at y = 112)</span></span>
 <span class="add"><span class="k">local</span> GRAVITY = <span class="n">0.25</span>    <span class="c">-- added to vy every frame (pixels per frame per frame)</span></span>
@@ -1548,7 +1548,7 @@ player = {
 <span class="add">    p.vy = <span class="n">0</span></span>
 <span class="add">    p.ground = <span class="k">true</span></span>
 <span class="add">  <span class="k">end</span></span></code></pre></figure>
-<ul><li><code>btnp(BTN_A) and p.ground</code>: jump only when standing (no jumping in mid-air) and only on the press.</li><li><strong>Variable jump height</strong>: while rising from a jump, letting go of <kbd>Z</kbd> cuts the upward speed to -1.5, so the jump ends early. Hold <kbd>Z</kbd> for a full jump, tap it for a hop. <code>p.jumping</code> makes sure only a jump you started can be cut short (later, springs and bounces also throw Pip up).</li><li><code>math.min(p.vy + GRAVITY, MAX_FALL)</code> adds gravity but never lets Pip fall faster than 4 pixels per frame, so long falls stay controllable.</li></ul>
+<ul><li><code>btnp(BTN_A) and p.ground</code>: jump only when standing, and only on the press.</li><li><strong>Variable jump height</strong>: while rising from a jump, letting go of <kbd>Z</kbd> cuts the upward speed to -1.5, so the jump ends early. Hold <kbd>Z</kbd> for a full jump, tap it for a hop. <code>p.jumping</code> makes sure only a jump you started can be cut short (later, springs and bounces also throw Pip up).</li><li><code>math.min(p.vy + GRAVITY, MAX_FALL)</code> adds gravity but never lets Pip fall faster than 4 pixels per frame, so long falls stay controllable.</li></ul>
 <h3 id="l05-s4"><span class="step">Step 4</span> Show jumping and falling</h3>
 <figure class="code"><div class="code-label">lesson 5 · replaces your draw_player(); new lines marked</div><button class="copy" type="button">Copy</button><pre><code><span class="k">function</span> draw_player(p)
   <span class="k">local</span> id
@@ -1848,7 +1848,7 @@ t = <span class="n">0</span>
   <div class="body">
 <h3 id="l06-s1"><span class="step">Step 1</span> Draw the ground tiles</h3>
 <p>A level is built from <strong>tiles</strong>: 8 x 8 pictures on the <strong>TILES</strong> tab (numbers 0-255), laid out on a grid called the <em>map</em>. Tile 0 stays empty: an empty map cell shows nothing.</p>
-<p>The sprite sheet has two halves, and the sprite editor shows one at a time: the two small tabs left of the sheet (or <kbd>Tab</kbd>) switch between them. So when you switch to TILES, Pip isn't gone: it's still on the <strong>SPRITES</strong> half, at 256. Every picture keeps its number, and its place on the sheet, from lesson to lesson. The map can only use the TILES half. Here is this lesson's sheet with both halves side by side:</p>
+<p>The sprite sheet has two halves, and the sprite editor shows one at a time: the two small tabs left of the sheet (or <kbd>Tab</kbd>) switch between them. So when you switch to TILES, Pip isn't gone: it's still on the <strong>SPRITES</strong> half, at 256. The map can only use the TILES half. Here is this lesson's sheet with both halves side by side:</p>
 <figure class="shot"><img src="media/sheet-06.png" alt="Left, the TILES half (0-255): the ground and the decorations of this lesson. Tile 0 (dashed frame) stays empty, because every empty map cell is tile 0. Right, the SPRITES half (256-511): Pip&#x27;s frames, starting at 256 (white frame)." loading="lazy" width="240" height="136"><figcaption>Left, the TILES half (0-255): the ground and the decorations of this lesson. Tile 0 (dashed frame) stays empty, because every empty map cell is tile 0. Right, the SPRITES half (256-511): Pip's frames, starting at 256 (white frame).</figcaption></figure>
 <p>Draw these tiles, numbers 1 to 6, on the TILES tab:</p>
 <figure class="card"><img src="media/card-ground.png" alt="Tiles 1-6: grass top (left edge, middle, right edge) and dirt (left edge, middle, right edge)." loading="lazy"><figcaption>Tiles 1-6: grass top (left edge, middle, right edge) and dirt (left edge, middle, right edge).</figcaption><details><summary>Pixel rows (one digit per pixel: the palette color number)</summary><figure class="code"><button class="copy" type="button">Copy</button><pre><code>-- tile 1: grass top-left
@@ -1910,7 +1910,7 @@ t = <span class="n">0</span>
 23222211
 22222221
 22122111</code></pre></figure></details></figure>
-<p>The grass tiles go on the top row of the ground, the dirt tiles below. The edge versions round off the corners where the ground ends. A quick way, and the way the drawings below do it: draw the left end (1) first. Copy it (<kbd>Ctrl</kbd><kbd>C</kbd>), click slot 2 and paste (<kbd>Ctrl</kbd><kbd>V</kbd>), then change the pixels that differ to make the middle. The right end (3) is the left end's mirror image: paste tile 1 into slot 3, click <strong>FLIP HORZ</strong> (under the canvas), and fix a few specks. The dirt goes the same way: 4, then a copy of it for 5, then a copy of 5 for 6.</p>
+<p>The grass tiles go on the top row of the ground, the dirt tiles below. The edge versions round off the corners where the ground ends. A quick way: draw the left end (1) first. Copy it (<kbd>Ctrl</kbd><kbd>C</kbd>), click slot 2 and paste (<kbd>Ctrl</kbd><kbd>V</kbd>), then change the pixels that differ to make the middle. The right end (3) is the left end's mirror image: paste tile 1 into slot 3, click <strong>FLIP HORZ</strong> (under the canvas), and fix a few specks. The dirt goes the same way: 4, then a copy of it for 5, then a copy of 5 for 6.</p>
 <figure class="shot"><img src="media/draw-001.gif" alt="Drawing tile 1, the grass&#x27;s left end, on the TILES half of the sheet: the fill tool makes it all earth, a bumpy green line marks where the grass ends and the fill tool greens everything above it, then come the light blades (one slips and is undone), the specks, and color 0 to rub out the top-left corner. Last, flag 0, because grass is solid." loading="lazy" width="240" height="136"><figcaption>Drawing tile 1, the grass's left end, on the TILES half of the sheet: the fill tool makes it all earth, a bumpy green line marks where the grass ends and the fill tool greens everything above it, then come the light blades (one slips and is undone), the specks, and color 0 to rub out the top-left corner. Last, flag 0, because grass is solid.</figcaption></figure>
 <figure class="shot"><img src="media/draw-002.gif" alt="Tile 2 starts as a copy of tile 1: paste it, then change what differs. A pasted copy brings its flags along, so flag 0 is already on." loading="lazy" width="240" height="136"><figcaption>Tile 2 starts as a copy of tile 1: paste it, then change what differs. A pasted copy brings its flags along, so flag 0 is already on.</figcaption></figure>
 <p>Then some decorations: a bush (24), a flower (25), tall grass (26) and a fence (28).</p>
@@ -1988,7 +1988,7 @@ dddddddd
 </aside>
 <h3 id="l06-s2"><span class="step">Step 2</span> Mark the solid tiles with a flag</h3>
 <p>Pip will soon stand on the ground and bump into walls (lesson 7). The code needs to know which tiles are solid. TIC-80 gives every sprite and tile <strong>8 flags</strong>, on/off switches with no fixed meaning: your game decides what they mean.</p>
-<p>In Pip's Peak, <strong>flag 0 means solid</strong>. (Later lessons use flag 1 for things that hurt, 2 for platforms you can jump through, 3 for ice and 4 for ?-blocks.)</p>
+<p>In Pip's Peak, <strong>flag 0 means solid</strong>.</p>
 <p>Switch on the advanced view (the small button at the top left of the sprite editor). A column of 8 small boxes appears next to the canvas: the flags of the selected tile. Select each of tiles 1-6 and click box <strong>0</strong>.</p>
 <figure class="editor"><div class="editor-pic"><img src="media/editor-sprite-flags.png" alt="Tile 2 with flag 0 switched on (the TILES half of the sheet)." loading="lazy" width="240" height="136"><span class="mark" style="left:49.17%;top:36.76%">1</span><span class="mark" style="left:46.67%;top:59.56%">2</span><span class="mark" style="left:30.83%;top:8.82%">3</span><span class="mark" style="left:3.75%;top:96.32%">4</span><span class="mark" style="left:38.33%;top:97.06%">5</span></div><figcaption>Tile 2 with flag 0 switched on (the TILES half of the sheet).</figcaption><ol class="legend"><li><span class="mark-inline">1</span><span><strong>Sprite flags 0-7</strong> of the selected tile: click a box to switch a flag on. Here flag 0 is on: in our game that means <em>solid</em>.</span></li><li><span class="mark-inline">2</span><span>The flags as one number (flag 0 on = 1).</span></li><li><span class="mark-inline">3</span><span>Tile 2, the grass top, from the TILES tab.</span></li><li><span class="mark-inline">4</span><span>Palette bank 0 or 1: two sets of 16 colors. We only use bank 0.</span></li><li><span class="mark-inline">5</span><span>Bits per pixel: 4 means 16 colors per sprite, what we always use.</span></li></ol></figure>
 <p>Leave the decorations without flags: Pip walks in front of them.</p>
@@ -2000,9 +2000,9 @@ dddddddd
 <p>The tools on the right of the top bar: <strong>draw</strong> (<kbd>1</kbd>, the default), <strong>drag</strong> (<kbd>2</kbd>, moves the view), <strong>select</strong> (<kbd>3</kbd>: drag a rectangle, then <kbd>Ctrl</kbd><kbd>C</kbd> copies it and <kbd>Ctrl</kbd><kbd>V</kbd> pastes a copy you click into place), <strong>fill</strong> (<kbd>4</kbd>). The grid button (or the key left of <kbd>1</kbd>) shows the cell borders. To find a cell, hover over the map with the draw tool: a little box next to the cursor shows the cell under it as <em>column:row</em>, like <code>013:011</code>. To pick up a tile that's already in the map, click it with the middle mouse button.</p>
 <p>Paint the first screen of Green Meadow at the top left of the map, cells 0-29 across and 0-16 down:</p>
 <ul><li>Rows <strong>14, 15 and 16</strong> are the ground: grass tiles on row 14, dirt below. The ground runs on past both sides of this screen, so here it's all middle tiles; the edge tiles are for where the ground ends at a gap (screen 2 has one).</li><li>A floating platform of grass on row <strong>11</strong>, columns <strong>13-17</strong>: tiles 1 2 2 2 3 (the grass with its two rounded ends).</li><li>A few bushes, flowers and tall grass on row 13, just above the ground.</li></ul>
-<p>The whole level is four screens wide (120 cells). Here it is, finished (you'll add the coins, enemies and other things in later lessons):</p>
+<p>The whole level is four screens wide (120 cells). Here it is, finished:</p>
 <figure class="shot map"><img src="media/level1.png" alt="All of Green Meadow, 120 x 17 cells." loading="lazy" width="240" height="136"><figcaption>All of Green Meadow, 120 x 17 cells.</figcaption></figure>
-<p>You can paint all four screens now, or just the first one and take the whole map from the lesson cart: put <code>lesson06.png</code> (the PNG cart linked at the top of this page) in TIC-80's folder, then type <code>load lesson06.png map</code> in the console. <code>load</code> with a section name (<code>map</code>, <code>tiles</code>, <code>sprites</code>, <code>flags</code>, <code>sfx</code>, <code>music</code>, <code>palette</code>) copies <strong>only that part</strong> of the other cart into yours and keeps everything else, your code included. It replaces your whole map, so do it before you paint, or paint after. Lesson 9 needs the full map.</p>
+<p>You can paint all four screens now, or just the first one and take the whole map from the lesson cart: type <code>load lesson06.png map</code> in the console, which copies <strong>only the map</strong> into your cart (<a href="#tip-load">Loading a lesson cart</a>). It replaces your whole map, so do it before you paint. Lesson 9 needs the full map.</p>
 <p>To move around the map, drag with the right mouse button, or press <kbd>Tab</kbd> for the <strong>world view</strong>, which shows the whole map with one pixel per cell; gray lines mark the screens:</p>
 <figure class="editor"><div class="editor-pic"><img src="media/editor-world.png" alt="The world view: the whole map. Click to center the map editor there." loading="lazy" width="240" height="136"><span class="mark" style="left:25.00%;top:19.12%">1</span><span class="mark" style="left:50.00%;top:51.47%">2</span></div><figcaption>The world view: the whole map. Click to center the map editor there.</figcaption><ol class="legend"><li><span class="mark-inline">1</span><span>The world view (<kbd>Tab</kbd>): the whole map shrunk down, one pixel per cell. Level 1 is the thin strip in the top-left four boxes; the red frame is what the map editor shows.</span></li><li><span class="mark-inline">2</span><span>Click anywhere to put the map editor's view there (centered on that spot). The gray lines mark screens of 30 x 17 cells.</span></li></ol></figure>
 <p>Explore the map in the <strong>Map Lab</strong>: the real map editor, with this lesson's map. Point at a cell to find out what is in it and whether Pip can stand on it, jump around with the small map of the whole world, paint, and <strong>▶ Try it in the game</strong>. Its <strong>Sprites</strong> tab shows the tiles and their flags.</p>
@@ -2300,7 +2300,6 @@ player = {
 <span class="add">      START_X, START_Y, <span class="n">0</span></span>
   <span class="k">end</span>
 <span class="k">end</span></code></pre></figure>
-<p>A few things to notice:</p>
 <ul><li>Sideways movement now goes through <code>move_x(p, dx)</code>.</li><li><code>p.x = math.max(0, math.min(p.x, 240 - p.w))</code> keeps Pip on the screen (until lesson 9 adds scrolling).</li><li>After moving vertically, <strong><code>p.ground</code> comes from looking one pixel below Pip's feet</strong>. Positions are fractions (gravity adds 0.25 at a time), and asking "is there ground right below?" is more reliable than remembering whether the last move hit something.</li><li>When standing, the fraction gravity added is dropped (<code>p.y // 1</code>), so Pip stands exactly on the tile.</li><li>Falling off the bottom of the screen puts Pip back at the start.</li></ul>
 <p>The drawing code changes in one place: the sprite is drawn at <code>p.x - 1</code> (the box is 6 pixels wide, the sprite 8, so the sprite starts one pixel left of the box), and the map is drawn as in lesson 6:</p>
 <figure class="code"><div class="code-label">lesson 7 · in draw_player(), replaces your line: spr(id, p.x, p.y, 0, 1, p.flip)</div><button class="copy" type="button">Copy</button><pre><code><span class="add">  <span class="a">spr</span>(id, p.x - <span class="n">1</span>, p.y, <span class="n">0</span>, <span class="n">1</span>, p.flip)</span></code></pre></figure>
@@ -2701,7 +2700,7 @@ player = {
 <span class="add">}</span></code></pre></figure>
 <p>Remove the old <code>GRAVITY</code>, <code>JUMP_SPEED</code>, <code>JUMP_CUT</code> and <code>MAX_FALL</code> constants: the code now reads <code>P.gravity</code>, <code>P.jump_speed</code> and so on.</p>
 <h3 id="l08-s2"><span class="step">Step 2</span> Speed up and slow down</h3>
-<p>The next three steps change <code>update_player</code> piece by piece, and the label above each piece says which of your lines it replaces. At the end of the lesson comes the whole new <code>update_player</code> with every change marked: if you prefer, read the steps, then type that in one go.</p>
+<p>The next three steps change <code>update_player</code> piece by piece.</p>
 <p>Until now Pip moved exactly one pixel per frame or not at all. Real movement has <strong>horizontal velocity</strong> <code>vx</code> that changes gradually. This helper moves a value toward a target by at most a step:</p>
 <figure class="code"><div class="code-label">lesson 8 · new function</div><button class="copy" type="button">Copy</button><pre><code><span class="c">-- Move v toward target by at most step.</span>
 <span class="k">function</span> approach(v, target, step)
@@ -2733,7 +2732,7 @@ player = {
 <p><code>p.flip = dir &lt; 0 and 1 or 0</code> is Lua's short way of writing "1 if <code>dir &lt; 0</code>, otherwise 0".</p>
 <h3 id="l08-s3"><span class="step">Step 3</span> Coyote time and the jump buffer</h3>
 <p>Two invisible helpers make jumping feel fair:</p>
-<ul><li><strong>Coyote time</strong>: for a few frames after running off a ledge, you can still jump. (Like a cartoon coyote that runs off a cliff and doesn't fall right away.) Without it, players press jump a frame too late and feel cheated.</li><li><strong>Jump buffer</strong>: if you press jump a few frames <em>before</em> landing, the jump happens when you land. Without it, early presses are lost.</li></ul>
+<ul><li><strong>Coyote time</strong>: for a few frames after running off a ledge, you can still jump. Without it, players press jump a frame too late and feel cheated.</li><li><strong>Jump buffer</strong>: if you press jump a few frames <em>before</em> landing, the jump happens when you land. Without it, early presses are lost.</li></ul>
 <p>Both are counters:</p>
 <figure class="code"><div class="code-label">lesson 8 · in update_player(), replaces your lines from: if btnp(BTN_A) and p.ground then … to: p.vy = JUMP_CUT · new lines marked</div><button class="copy" type="button">Copy</button><pre><code><span class="add">  <span class="c">-- coyote time: count down from the moment Pip leaves the ground</span></span>
 <span class="add">  <span class="k">if</span> p.ground <span class="k">then</span></span>
@@ -2819,7 +2818,7 @@ player = {
   <span class="a">spr</span>(id, p.x - <span class="n">1</span>, p.y, <span class="n">0</span>, <span class="n">1</span>, p.flip)
 <span class="k">end</span></code></pre></figure>
 <h3 id="l08-s5"><span class="step">Step 5</span> All of update_player</h3>
-<p>The pieces above replace most of <code>update_player</code>. Here it is in one piece, with this lesson's new and changed lines marked (gravity now uses <code>P.gravity</code> and <code>P.max_fall</code>, since the old <code>GRAVITY</code> and <code>MAX_FALL</code> constants moved into <code>P</code>):</p>
+<p>Here is <code>update_player</code> in one piece (gravity now uses <code>P.gravity</code> and <code>P.max_fall</code>, since the old <code>GRAVITY</code> and <code>MAX_FALL</code> constants moved into <code>P</code>):</p>
 <figure class="code"><div class="code-label">lesson 8 · replaces your update_player(); new lines marked</div><button class="copy" type="button">Copy</button><pre><code><span class="k">function</span> update_player(p)
 <span class="add">  <span class="c">-- run: accelerate toward the top speed, or slide to a stop</span></span>
 <span class="add">  <span class="k">local</span> dir = <span class="n">0</span></span>
@@ -3321,7 +3320,7 @@ t = <span class="n">0</span>
   </div>
   <div class="body">
 <h3 id="l09-s1"><span class="step">Step 1</span> Describe the level</h3>
-<p>This lesson scrolls through all of Green Meadow, so your map needs all four screens of it now. If you painted only the first, copy the rest from the lesson cart: <code>load lesson09.png map</code> in the console (lesson 6 explains how this works).</p>
+<p>This lesson scrolls through all of Green Meadow, so your map needs all four screens of it now. If you painted only the first, copy the rest from the lesson cart: <code>load lesson09.png map</code> in the console (see <a href="#tip-load">Loading a lesson cart</a>).</p>
 <p>The level is the rectangle of the map it occupies, in cells. Green Meadow starts at cell 0, 0 and is 120 cells wide and 17 tall:</p>
 
 <figure class="code"><div class="code-label">lesson 9 · at the top, outside the functions</div><button class="copy" type="button">Copy</button><pre><code><span class="add"><span class="c">-- the level&#x27;s rectangle on the map, in cells (level 1 is 4 screens wide)</span></span>
@@ -3329,7 +3328,7 @@ t = <span class="n">0</span>
 <span class="add">  x = <span class="n">0</span>, y = <span class="n">0</span>, w = <span class="n">120</span>, h = <span class="n">17</span></span>
 <span class="add">}</span>
 <span class="add"><span class="k">local</span> SKY = <span class="n">10</span></span></code></pre></figure>
-<p>Add clouds to the sky while you're at it: draw tiles 29-31 and paint a few clouds in the top rows of the map.</p>
+<p>Add clouds to the sky too: draw tiles 29-31 and paint a few clouds in the top rows of the map.</p>
 <figure class="card"><img src="media/card-clouds.png" alt="Tiles 29-31: a cloud&#x27;s left end, middle and right end." loading="lazy"><figcaption>Tiles 29-31: a cloud's left end, middle and right end.</figcaption><details><summary>Pixel rows (one digit per pixel: the palette color number)</summary><figure class="code"><button class="copy" type="button">Copy</button><pre><code>-- tile 29: cloud left
 00000000
 00000000
@@ -3865,7 +3864,7 @@ cam = {x = <span class="n">0</span>, y = <span class="n">0</span>}   <span class
 00030000
 00030000</code></pre></figure></details></figure>
 <p>In the map editor, put tile 50 where Pip should start: column 1, row 13 of Green Meadow. Put the arrow sign at column 5, row 13.</p>
-<p>The idea: when a level starts, a <strong>loader</strong> scans the level's cells. Every <em>marker tile</em> it recognizes is replaced by an empty cell and does something: here, "Pip starts here". In later lessons, coin, enemy and goal markers work the same way, so you build whole levels in the map editor.</p>
+<p>The idea: when a level starts, a <strong>loader</strong> scans the level's cells. Every <em>marker tile</em> it recognizes is replaced by an empty cell and does something: here, "Pip starts here".</p>
 <h3 id="l10-s2"><span class="step">Step 2</span> A table of levels</h3>
 <p>Levels become entries in a list, each with its rectangle on the map and its colors:</p>
 <p>New and changed definitions outside the functions (constants, tables, variables): add these to your cart, or replace the old version of the same lines.</p><figure class="code"><div class="code-label">lesson 10</div><button class="copy" type="button">Copy</button><pre><code><span class="k">local</span> M_START = <span class="n">50</span>      <span class="c">-- marker tile: where Pip starts the level</span>
@@ -4002,7 +4001,7 @@ level_t = <span class="n">0</span>            <span class="c">-- frames since th
     state = <span class="s">&quot;play&quot;</span>
   <span class="k">end</span>
 <span class="k">end</span></code></pre></figure>
-<p>Text looks best centered, and working out the x position by hand for every line is no fun. This helper does it: <code>print</code> returns the width of the text it drew, so it prints the text once far above the screen (where it can't be seen) to measure it, then again at the right place:</p>
+<p>This helper centers text, so you don't work out each line's x position by hand: <code>print</code> returns the width of the text it drew, so it prints the text once far above the screen (where it can't be seen) to measure it, then again at the right place:</p>
 <figure class="code"><div class="code-label">lesson 10 · new function</div><button class="copy" type="button">Copy</button><pre><code><span class="c">-- Print text centered across the screen. print() returns the width of what</span>
 <span class="c">-- it drew, so measure the text off-screen first.</span>
 <span class="k">function</span> print_centered(text, y,
@@ -4027,7 +4026,7 @@ level_t = <span class="n">0</span>            <span class="c">-- frames since th
   <span class="k">end</span>
 <span class="k">end</span></code></pre></figure>
 <p><code>print(text, x, y, color, fixed, scale)</code>: scale 3 draws the title text three times as big. Drawing it twice, offset by 2 pixels in a dark color, gives it a shadow. <code>t // 30 % 2 == 0</code> is true for half a second, false for the next half: blinking.</p>
-<p>The level's name appears for two seconds at the start (<code>level_t</code> counts frames since the level started):</p>
+<p>The level's name appears for two seconds at the start:</p>
 <figure class="code"><div class="code-label">lesson 10 · new function</div><button class="copy" type="button">Copy</button><pre><code><span class="c">-- The level&#x27;s name, for the first two seconds.</span>
 <span class="k">function</span> draw_banner()
   <span class="k">if</span> level_t &gt; <span class="n">120</span> <span class="k">then</span> <span class="k">return</span> <span class="k">end</span>
@@ -4731,10 +4730,10 @@ bccbbaab
 000b0000
 00000000
 00000000</code></pre></figure></details></figure>
-<p>A spinning coin is just four frames: the coin seen from the front, then narrower and narrower. Draw them on the SPRITES tab at 288-291 and the gem at 292. Then draw the <strong>markers</strong> on the TILES tab, so you can place coins and gems in the map: tile 48 looks like a coin and tile 49 like a gem. And two small icons for the status bar: 354 (coin) and 355 (gem).</p>
+<p>A spinning coin is four frames: the coin seen from the front, then narrower and narrower. Draw them on the SPRITES tab at 288-291 and the gem at 292. Then draw the <strong>markers</strong> on the TILES tab, so you can place coins and gems in the map: tile 48 looks like a coin and tile 49 like a gem. And two small icons for the status bar: 354 (coin) and 355 (gem).</p>
 <p>In the map editor, place coin markers along Green Meadow: rows of three over the gap, on the floating platform, and so on. Hide <strong>three gems</strong> in hard-to-reach places. The finished level has one high above the first floating platform (column 15, row 7), one high above the steps on screen 3 (77, 6) and one over the pit on screen 4 (102, 10), where only a well-timed jump gets it without falling in.</p>
 <h3 id="l11-s2"><span class="step">Step 2</span> Entities</h3>
-<p>Coins are the first thing in the level that isn't Pip or the map. Soon there will be enemies, items, platforms… So give them all the same shape: an <strong>entity</strong> is a table with a box (<code>x, y, w, h</code>) and two functions, <code>update</code> and <code>draw</code>. A list, <code>ents</code>, holds them all.</p>
+<p>Give coins, and everything else in the level that isn't Pip or the map, the same shape: an <strong>entity</strong> is a table with a box (<code>x, y, w, h</code>) and two functions, <code>update</code> and <code>draw</code>. A list, <code>ents</code>, holds them all.</p>
 <p>New and changed definitions outside the functions (constants, tables, variables): add these to your cart, or replace the old version of the same lines.</p><figure class="code"><div class="code-label">lesson 11</div><button class="copy" type="button">Copy</button><pre><code><span class="k">local</span> ANIM_COIN = {<span class="n">288</span>, <span class="n">289</span>, <span class="n">290</span>, <span class="n">291</span>}
 
 <span class="k">local</span> SPR_GEM = <span class="n">292</span>
@@ -4850,7 +4849,7 @@ score, coins, gems = <span class="n">0</span>, <span class="n">0</span>, <span c
   level_t = <span class="n">0</span>
 <span class="k">end</span></code></pre></figure>
 <h3 id="l11-s5"><span class="step">Step 5</span> Particles</h3>
-<p>A <em>particle</em> is a dot that flies for a moment and disappears. They are cheap and make everything feel better. <code>burst</code> throws <code>n</code> of them in random directions:</p>
+<p>A <em>particle</em> is a dot that flies for a moment and disappears. <code>burst</code> throws <code>n</code> of them in random directions:</p>
 <figure class="code"><div class="code-label">lesson 11 · new function</div><button class="copy" type="button">Copy</button><pre><code><span class="k">function</span> burst(x, y, n, color)
   <span class="k">for</span> _ = <span class="n">1</span>, n <span class="k">do</span>
     parts[#parts + <span class="n">1</span>] = {
@@ -5775,7 +5774,7 @@ SPAWN = {
 <span class="add"><span class="k">local</span> INVULNERABLE = <span class="n">90</span>  <span class="c">-- frames of safety after getting hurt</span></span></code></pre></figure>
 <p>Pip has three hearts (<code>hp</code>). Losing all of them costs a <strong>life</strong>, and losing all lives is game over. After a hit, Pip is <strong>invulnerable</strong> for 90 frames (a second and a half) and blinks, so one spike can't take all three hearts at once.</p>
 <h3 id="l12-s3"><span class="step">Step 3</span> Touching a hazard</h3>
-<p>Hazards use flag 1. This is like <code>box_hits</code>, for any flag, and without the level walls:</p>
+<p>This is like <code>box_hits</code>, for any flag, and without the level walls:</p>
 <figure class="code"><div class="code-label">lesson 12 · new function</div><button class="copy" type="button">Copy</button><pre><code><span class="c">-- Does the box touch a tile with the given flag? (no level walls here)</span>
 <span class="k">function</span> box_touches(x, y, w, h, flag)
   <span class="k">for</span> ty = y // <span class="n">8</span>, (y + h - <span class="n">1</span>) // <span class="n">8</span> <span class="k">do</span>
@@ -5820,7 +5819,7 @@ SPAWN = {
   p.vy = -<span class="n">2.5</span>
   p.jumping = <span class="k">false</span>
 <span class="k">end</span></code></pre></figure>
-<p>The <strong>knockback</strong> pushes Pip away from the hit (left if the hit came from the right) and a little up, so it's clear something happened. Falling into a pit doesn't take a heart: it loses a life right away.</p>
+<p>The <strong>knockback</strong> pushes Pip away from the hit (left if the hit came from the right) and a little up. Falling into a pit doesn't take a heart: it loses a life right away.</p>
 <figure class="code"><div class="code-label">lesson 12 · new function</div><button class="copy" type="button">Copy</button><pre><code><span class="k">function</span> lose_life()
   lives = lives - <span class="n">1</span>
   set_state(<span class="s">&quot;dead&quot;</span>)
@@ -7001,7 +7000,7 @@ SPAWN = {
   <span class="k">end</span>
   touch_enemy(e)
 <span class="k">end</span></code></pre></figure>
-<p>The slime uses the same <code>move_x</code> and <code>move_y</code> as Pip: gravity, collision, everything is shared. It turns around when it walks into a wall, or when it's standing on something and the next step has no floor:</p>
+<p>The slime uses the same <code>move_x</code> and <code>move_y</code> as Pip, so it falls and collides the same way. It turns around when it walks into a wall, or when it's standing on something and the next step has no floor:</p>
 <figure class="code"><div class="code-label">lesson 13 · new function</div><button class="copy" type="button">Copy</button><pre><code><span class="c">-- Is there floor just past the front edge of e? (so it can turn at ledges)</span>
 <span class="k">function</span> floor_ahead(e)
   <span class="k">local</span> fx =
@@ -7036,7 +7035,7 @@ SPAWN = {
     <span class="k">and</span> P.jump_speed <span class="k">or</span> -<span class="n">2.5</span>
   player.jumping = <span class="a">btn</span>(BTN_A)    <span class="c">-- a high bounce can be cut short, like a jump</span>
 <span class="k">end</span></code></pre></figure>
-<p>The squashed slime stays flat for 20 frames, then disappears. Pip bounces up, and higher if the jump button is held (a trick from Mario games): <code>player.jumping</code> makes that high bounce something you can cut short, like a jump.</p>
+<p>The squashed slime stays flat for 20 frames, then disappears. Pip bounces up, and higher if the jump button is held: <code>player.jumping</code> makes that high bounce something you can cut short, like a jump.</p>
 <figure class="code"><div class="code-label">lesson 13 · new function</div><button class="copy" type="button">Copy</button><pre><code><span class="k">function</span> draw_slime(e)
   <span class="k">local</span> id =
     e.squashed &gt; <span class="n">0</span> <span class="k">and</span> SPR_SLIME_FLAT
@@ -8017,7 +8016,7 @@ c2c2c2c0
 22222220
 03000300
 33003300</code></pre></figure></details></figure>
-<p>And their markers on the TILES tab: 54 (bat), 55 (turret), 56 (spiky). Place a bat above the spikes on screen 2, a turret on top of the steps on screen 3, and a spiky near the end of the level.</p>
+<p>Draw them, and their markers on the TILES tab: 54 (bat), 55 (turret), 56 (spiky). Place a bat above the spikes on screen 2, a turret on top of the steps on screen 3, and a spiky near the end of the level.</p>
 <p>New and changed definitions outside the functions (constants, tables, variables): add these to your cart, or replace the old version of the same lines.</p><figure class="code"><div class="code-label">lesson 14</div><button class="copy" type="button">Copy</button><pre><code><span class="k">local</span> ANIM_BAT = {<span class="n">275</span>, <span class="n">276</span>}
 
 <span class="k">local</span> SPR_TURRET = <span class="n">277</span>
@@ -9272,7 +9271,7 @@ SPAWN = {
   <span class="a">sfx</span>(id, <span class="k">nil</span>, -<span class="n">1</span>, SFX_CHANNEL)
 <span class="k">end</span></code></pre></figure>
 <aside class="tip">
-<p>A TIC-80 detail worth knowing: leaving out <code>note</code> (or passing <code>nil</code>) plays the SFX at the note you set in the editor, but passing <strong>-1</strong> does not; it plays the lowest note there is. That's why <code>play</code> passes <code>nil</code>. A duration of -1 lets the sound play to its end.</p>
+<p>Leaving out <code>note</code> (or passing <code>nil</code>) plays the SFX at the note you set in the editor, but passing <strong>-1</strong> does not; it plays the lowest note there is. That's why <code>play</code> passes <code>nil</code>. A duration of -1 lets the sound play to its end.</p>
 </aside>
 <p>Now call <code>play</code> where things happen. When a jump starts:</p>
 <figure class="code"><div class="code-label">lesson 15 · in update_player(), after: p.buffer, p.coyote = 0, 0 · new lines marked</div><button class="copy" type="button">Copy</button><pre><code>  <span class="k">if</span> p.buffer &gt; <span class="n">0</span>
@@ -9282,7 +9281,7 @@ SPAWN = {
     p.buffer, p.coyote = <span class="n">0</span>, <span class="n">0</span>
 <span class="add">    play(SND.JUMP)</span>
   <span class="k">end</span></code></pre></figure>
-<p>The others, each one line added to a function you already have:</p>
+<p>The others, each one line in a function you already have:</p>
 <div class="table"><table><thead><tr><th>Function</th><th>Where</th><th>Line</th></tr></thead><tbody><tr><td><code>update_pickup</code></td><td>when a gem is taken</td><td><code>play(SND.GEM)</code></td></tr><tr><td><code>update_checkpoint</code></td><td>when the flag goes up</td><td><code>play(SND.CHECKPOINT)</code></td></tr><tr><td><code>stomp</code></td><td>after the <code>burst</code></td><td><code>play(SND.STOMP)</code></td></tr><tr><td><code>update_turret</code></td><td>when a bullet is fired</td><td><code>play(SND.SHOOT)</code></td></tr><tr><td><code>hurt</code></td><td>at the end</td><td><code>play(SND.HURT)</code></td></tr><tr><td><code>lose_life</code></td><td>after <code>set_state(&quot;dead&quot;)</code></td><td><code>play(SND.DIE)</code></td></tr><tr><td><code>update_title</code></td><td>when <kbd>Z</kbd> starts the game</td><td><code>play(SND.MENU)</code></td></tr></tbody></table></div>
 <p>And coins now go through <code>add_coins</code> (next step) instead of adding to <code>coins</code> directly:</p>
 <figure class="code"><div class="code-label">lesson 15 · replaces your update_pickup(); new lines marked</div><button class="copy" type="button">Copy</button><pre><code><span class="k">function</span> update_pickup(e)
@@ -9301,7 +9300,7 @@ SPAWN = {
   <span class="k">end</span>
 <span class="k">end</span></code></pre></figure>
 <h3 id="l15-s8"><span class="step">Step 8</span> An extra life every 50 coins</h3>
-<p>A good use for a special sound: coins now go through <code>add_coins</code>, which gives a life every 50 coins and plays the 1-up jingle instead of the coin sound:</p>
+<p><code>add_coins</code> gives a life every 50 coins and plays the 1-up jingle instead of the coin sound:</p>
 <figure class="code"><div class="code-label">lesson 15 · new function</div><button class="copy" type="button">Copy</button><pre><code><span class="c">-- Every COINS_PER_LIFE coins earn an extra life.</span>
 <span class="k">function</span> add_coins(n)
   <span class="k">local</span> before =
@@ -9316,7 +9315,7 @@ SPAWN = {
   <span class="k">end</span>
 <span class="k">end</span></code></pre></figure>
 <aside class="check"><h4>Check your work</h4>
-<p>Every action has a sound: jumping rises, coins ding, stomps thump, hurting buzzes. Sounds never pile up into a mess: they all share channel 3, so a new sound simply replaces the one playing. Every 50th coin plays the 1-up jingle and adds a life (to try it without collecting 50 coins, start the game with <code>coins = 49</code> in <code>update_title</code>).</p>
+<p>Every action has a sound: jumping rises, coins ding, stomps thump, hurting buzzes. Sounds never pile up into a mess: they all share channel 3, so a new sound replaces the one playing. Every 50th coin plays the 1-up jingle and adds a life (to try it without collecting 50 coins, start the game with <code>coins = 49</code> in <code>update_title</code>).</p>
 </aside>
 <figure class="play-embed" data-src="play/player.html?cart=lesson15&amp;autostart=1"><div class="screen"><img src="media/poster-15.png" alt="The finished lesson 15 cart, before it runs" loading="lazy"><button type="button" class="play-btn">▶ Run the lesson 15 cart</button></div><figcaption>What your cart should do at the end of this lesson. Click the game first; then the arrow keys, <kbd>Z</kbd> and <kbd>X</kbd> play it. <a href="play/player.html?cart=lesson15" target="_blank" rel="noopener">Open it in a new tab</a>.</figcaption></figure>
 <section class="challenge"><h4><span class="tag">Challenge</span> A landing sound</h4>
@@ -10413,14 +10412,14 @@ bar 2: C-4:18  .   A-8:20  .   C-7:19  .   A-8:20  .   C-4:18  .   A-8:20  .   C
 bar 3: C-4:18  .   A-8:20  .   C-7:19  .   A-8:20  .   C-4:18  .   A-8:20  .   C-7:19  .   A-8:20  .  
 bar 4: C-4:18  .   A-8:20  .   C-7:19  .   A-8:20  .   C-4:18  .   C-7:19 C-7:19 C-7:19  .   C-7:19  .  </code></pre></figure>
 <h3 id="l16-s6"><span class="step">Step 6</span> The other tracks</h3>
-<p>The other six tracks are built the same way. Listen to them:</p>
+<p>The other tracks are built the same way. Listen to them:</p>
 <figure class="sound"><figcaption>Track 0, title: bells over a soft pad</figcaption><audio controls preload="none" src="media/music-0.wav"></audio></figure>
 <figure class="sound"><figcaption>Track 2, cave: slower, in a minor key</figcaption><audio controls preload="none" src="media/music-2.wav"></audio></figure>
 <figure class="sound"><figcaption>Track 3, boss: fast and driving</figcaption><audio controls preload="none" src="media/music-3.wav"></audio></figure>
 <figure class="sound"><figcaption>Track 4, level clear (plays once)</figcaption><audio controls preload="none" src="media/music-4.wav"></audio></figure>
 <figure class="sound"><figcaption>Track 5, game over (plays once)</figcaption><audio controls preload="none" src="media/music-5.wav"></audio></figure>
 <figure class="sound"><figcaption>Track 6, victory (plays once)</figcaption><audio controls preload="none" src="media/music-6.wav"></audio></figure>
-<p>You can type them in from the notes below, or copy them from the lesson cart: with <code>lesson16.png</code> in TIC-80's folder, <code>load lesson16.png sfx</code> copies the SFX and waveforms into your cart and <code>load lesson16.png music</code> the patterns and tracks, leaving everything else as it is. (Run <code>save</code> afterwards.)</p>
+<p>You can type them in from the notes below, or copy them from the lesson cart: <code>load lesson16.png sfx</code> copies the SFX and waveforms into your cart and <code>load lesson16.png music</code> the patterns and tracks. Then <code>save</code> (see <a href="#tip-load">Loading a lesson cart</a>).</p>
 <details class="all-tracks"><summary>The notes of every other track</summary><figure class="track"><figcaption>Track 0 (title): tempo 110, speed 6, 64 rows per frame</figcaption><div class="tracker-frames"><figure><img src="media/music-t0-f0.png" loading="lazy" width="240" height="419" alt="Track 0, frame 0 in the tracker"><figcaption>Frame 0, all 64 rows</figcaption></figure></div><div class="table"><table><thead><tr><th>Frame</th><th>Channel 1</th><th>Channel 2</th><th>Channel 3</th><th>Channel 4</th></tr></thead><tbody><tr><td>0</td><td>12 <span class="muted">title melody</span></td><td>13 <span class="muted">title pad</span></td><td>00 <span class="muted">(silent)</span></td><td>00 <span class="muted">(silent)</span></td></tr></tbody></table></div></figure><figure class="code"><button class="copy" type="button">Copy</button><pre><code>pattern 12: title melody   (instrument: SFX 23, bell)
 bar 1: C-6   .   E-6   .   G-6   .   C-7   .    .    .   G-6   .   E-6   .    .    .  
 bar 2: A-5   .   C-6   .   E-6   .   A-6   .    .    .   E-6   .   C-6   .    .    .  
@@ -10488,7 +10487,7 @@ bar 4: C-4   .    .    .    .    .    .    .    .    .    .    .   ==    .    . 
 <span class="add">    <span class="a">music</span> = <span class="n">1</span></span>
   },
 }</code></pre></figure>
-<p><code>set_state</code> is the natural place to change the music, because the music belongs to the state:</p>
+<p>Change the music in <code>set_state</code>:</p>
 <figure class="code"><div class="code-label">lesson 16 · replaces your set_state(); new lines marked</div><button class="copy" type="button">Copy</button><pre><code><span class="k">function</span> set_state(s)
 <span class="add">  <span class="k">local</span> before = state</span>
   state, state_t = s, <span class="n">0</span>
@@ -10524,7 +10523,7 @@ bar 4: C-4   .    .    .    .    .    .    .    .    .    .    .   ==    .    . 
 </section>
 <section class="challenge"><h4><span class="tag">Challenge</span> A star theme</h4>
 <p>Make a short, fast, looping track for later (lesson 17's star power-up): a quick arpeggio over a pulsing bass.</p>
-<details class="example"><summary>See what it might look like</summary><p>Track 7: a C-F-G-F arpeggio, one note per row at tempo 200, over a bass that jumps between root and octave. BOOT writes it into music RAM (you'd type it into the tracker); the title screen plays it so you can hear it.</p><figure class="play-embed example-play" data-src="play/player.html?cart=ch-16-star-theme&amp;autostart=1"><div class="screen"><img src="media/poster-16.png" alt="" loading="lazy"><button type="button" class="play-btn">▶ Run it</button></div><figcaption>One possible result, not the only right answer. Run it, click the game, then play. <a href="play/player.html?cart=ch-16-star-theme" target="_blank" rel="noopener">Open it in a new tab</a>.</figcaption></figure></details>
+<details class="example"><summary>See what it might look like</summary><p>Track 7: a C-F-G-F arpeggio, one note per row at tempo 200, over a bass that jumps between root and octave. You type it into the tracker; the example's title screen plays it so you can hear it.</p><figure class="play-embed example-play" data-src="play/player.html?cart=ch-16-star-theme&amp;autostart=1"><div class="screen"><img src="media/poster-16.png" alt="" loading="lazy"><button type="button" class="play-btn">▶ Run it</button></div><figcaption>One possible result, not the only right answer. Run it, click the game, then play. <a href="play/player.html?cart=ch-16-star-theme" target="_blank" rel="noopener">Open it in a new tab</a>.</figcaption></figure></details>
 </section>
   </div>
   <details class="full"><summary>The whole cart's code after lesson 16</summary>
@@ -11728,7 +11727,7 @@ player = {
 <p><code>mset</code> changes the map in RAM, not in the cart. That's why <code>load_level</code> starts with <code>sync(4, 0, false)</code> (lesson 10): it copies the map back from the cart, so every new game starts with fresh ?-blocks.</p>
 </aside>
 <h3 id="l17-s4"><span class="step">Step 4</span> Items</h3>
-<p>An item is one more kind of entity. It rises out of its block (half a pixel per frame, until it's 7 pixels higher), then slides away from Pip, drops off the blocks like a walker and waits on the ground, bobbing. (An item that stayed on top of its block would be out of reach: Pip can't jump that high.)</p>
+<p>An item is one more kind of entity. It rises out of its block (half a pixel per frame, until it's 7 pixels higher), then slides away from Pip, drops off the blocks like a walker and waits on the ground, bobbing.</p>
 <figure class="code"><div class="code-label">lesson 17 · new function</div><button class="copy" type="button">Copy</button><pre><code><span class="c">-- An item slides up out of its block, then waits to be picked up.</span>
 <span class="k">function</span> new_item(x, y, kind)
   add_ent({
@@ -11776,7 +11775,7 @@ player = {
       e.x - <span class="n">1</span> - cam.x,
       e.y - <span class="n">1</span> - cam.y + bob, <span class="n">0</span>)
 <span class="k">end</span></code></pre></figure>
-<p><code>ITEM_SPRITE[e.kind]</code> turns the block's tile id into the item's sprite: one table, no <code>if</code>s.</p>
+<p><code>ITEM_SPRITE[e.kind]</code> turns the block's tile id into the item's sprite.</p>
 <h3 id="l17-s5"><span class="step">Step 5</span> The power-ups</h3>
 <figure class="code"><div class="code-label">lesson 17 · new function</div><button class="copy" type="button">Copy</button><pre><code><span class="k">function</span> power_up(kind)
   <span class="k">local</span> p = player
@@ -11875,7 +11874,7 @@ player = {
 <span class="add">    play(SND.STOMP)</span>
 <span class="add">    <span class="k">return</span></span>
 <span class="add">  <span class="k">end</span></span></code></pre></figure>
-<p>The star also makes Pip flash through colors. You could draw more sprites for that, but TIC-80 has a better tool: the <strong>palette map</strong>.</p>
+<p>The star also makes Pip flash through colors. Instead of drawing more sprites for that, you can use the <strong>palette map</strong>.</p>
 <h3 id="l17-s8"><span class="step">Step 8</span> The palette map</h3>
 <p>When TIC-80 draws a pixel of color <em>c</em>, it first looks <em>c</em> up in a 16-entry table, the palette map, at RAM address <strong>0x3FF0</strong>, and draws the color it finds there. Normally entry <em>c</em> holds <em>c</em>, so nothing changes. Change entry 6 to 2 and everything drawn in green (color 6) comes out red (color 2) instead, until you change it back.</p>
 <p>Each entry is 4 bits (half a byte, a <em>nibble</em>). <code>poke4(address, value)</code> writes one nibble; nibble addresses are byte addresses times 2. So entry <em>i</em> of the palette map is nibble <code>0x3FF0 * 2 + i</code>:</p>
@@ -13747,7 +13746,7 @@ SPAWN = {
   <span class="k">end</span></code></pre></figure>
 <p><code>box_touches(p.x, p.y + p.h, p.w, 1, F_ICE)</code> looks at the one row of pixels just under Pip's feet.</p>
 <h3 id="l18-s6"><span class="step">Step 6</span> Bubbling lava with remap</h3>
-<p>Lava should move. You could change the map with <code>mset</code> every few frames, but there's a neater way: <code>map()</code> takes a <strong>remap</strong> function as its last argument. For every cell it draws, <code>map()</code> calls <code>remap(tile, x, y)</code> and draws the tile the function returns instead. The map itself never changes.</p>
+<p>Lava should move. Instead of changing the map with <code>mset</code> every few frames, give <code>map()</code> a <strong>remap</strong> function as its last argument. For every cell it draws, <code>map()</code> calls <code>remap(tile, x, y)</code> and draws the tile the function returns instead. The map itself never changes.</p>
 <figure class="code"><div class="code-label">lesson 18 · new function</div><button class="copy" type="button">Copy</button><pre><code><span class="c">-- map() calls this for every cell it draws and draws what it returns:</span>
 <span class="c">-- lava swaps between its two tiles to bubble, without changing the map.</span>
 <span class="k">function</span> remap(tile, x, y)
@@ -13877,7 +13876,7 @@ SPAWN = {
   <span class="a">spr</span>(SPR_GOAL, e.x - cam.x,
       e.y - cam.y, <span class="n">0</span>, <span class="n">1</span>, <span class="n">0</span>, <span class="n">0</span>, <span class="n">1</span>, <span class="n">2</span>)
 <span class="k">end</span></code></pre></figure>
-<p>The goal flag is two tiles tall, so a player can spot it from far away. <code>spr</code> has two more arguments after <code>rotate</code>: <strong>w</strong> and <strong>h</strong>, the size in sprites. With <code>w = 1, h = 2</code>, it draws sprite 299 and, under it, sprite 315 (the one below 299 on the sheet, which has 16 sprites per row). That's why <code>new_goal</code> moves the box up by 8 pixels and makes it 16 tall.</p>
+<p>The goal flag is two tiles tall. <code>spr</code> has two more arguments after <code>rotate</code>: <strong>w</strong> and <strong>h</strong>, the size in sprites. With <code>w = 1, h = 2</code>, it draws sprite 299 and, under it, sprite 315 (the one below 299 on the sheet, which has 16 sprites per row). That's why <code>new_goal</code> moves the box up by 8 pixels and makes it 16 tall.</p>
 <p>Every level needs a goal marker: in Green Meadow at column 116, row 13 (the end of screen 4); the Crystal Cave's is at (116, 30) and the Sky Tower's at (175, 4), on its top-right ledge.</p>
 <p>Add the four new markers to <code>SPAWN</code>:</p>
 <figure class="code"><div class="code-label">lesson 18 · outside the functions, below draw_background() · new lines marked</div><button class="copy" type="button">Copy</button><pre><code><span class="add">  [M_GOAL] = new_goal,</span>
@@ -13990,7 +13989,7 @@ SPAWN = {
 </section>
 <section class="challenge"><h4><span class="tag">Challenge</span> Conveyor belts</h4>
 <p>Make a tile that moves Pip along while standing on it: give it a new flag and, in <code>update_player</code>, call <code>move_x(p, 0.5)</code> when Pip stands on one.</p>
-<details class="example"><summary>See what it might look like</summary><p>Tile 35 is a conveyor belt with flags 0 (solid) and 5 (conveyor): standing on it moves Pip 0.5 pixels right every frame, on top of his own running. Walk onto the belt right of the start and let go.</p><figure class="play-embed example-play" data-src="play/player.html?cart=ch-18-conveyor-belts&amp;autostart=1"><div class="screen"><img src="media/ch-18-conveyor-belts.gif" alt="" loading="lazy"><button type="button" class="play-btn">▶ Run it</button></div><figcaption>One possible result, not the only right answer. Run it, click the game, then play. <a href="play/player.html?cart=ch-18-conveyor-belts" target="_blank" rel="noopener">Open it in a new tab</a>.</figcaption></figure></details>
+<details class="example"><summary>See what it might look like</summary><p>Tile 35 is a conveyor belt with flags 0 (solid) and 5 (conveyor): standing on it moves Pip 0.5 pixels right every frame, on top of its own running. Walk onto the belt right of the start and let go.</p><figure class="play-embed example-play" data-src="play/player.html?cart=ch-18-conveyor-belts&amp;autostart=1"><div class="screen"><img src="media/ch-18-conveyor-belts.gif" alt="" loading="lazy"><button type="button" class="play-btn">▶ Run it</button></div><figcaption>One possible result, not the only right answer. Run it, click the game, then play. <a href="play/player.html?cart=ch-18-conveyor-belts" target="_blank" rel="noopener">Open it in a new tab</a>.</figcaption></figure></details>
 </section>
 <section class="challenge"><h4><span class="tag">Challenge</span> Your own level</h4>
 <p>Add a fourth level to <code>LEVELS</code>, somewhere free in the map (the strip at rows 34-50 has room to the right of the throne room that lesson 19 adds). Use at least three of the gadgets from this lesson.</p>
@@ -16069,7 +16068,7 @@ SPAWN = {
 <span class="k">end</span></code></pre></figure>
 <p>He turns to face Pip (<code>flip</code>), and when he's dizzy, three little stars (the HUD star sprite) circle his head.</p>
 <h3 id="l19-s4"><span class="step">Step 4</span> A boss is a state machine</h3>
-<p>A boss is just another entity, but with a <strong>mode</strong> that says what it's doing, and a <strong>timer</strong> for how long. Each mode does its own thing and switches to the next mode when the time comes:</p>
+<p>A boss is an entity, but with a <strong>mode</strong> that says what it's doing, and a <strong>timer</strong> for how long. Each mode does its own thing and switches to the next mode when the time comes:</p>
 <div class="table"><table><thead><tr><th>Mode</th><th>What happens</th><th>Next</th></tr></thead><tbody><tr><td><code>wait</code></td><td>sits still; squishes 15 frames before jumping (a warning)</td><td><code>hop</code> when the timer runs out</td></tr><tr><td><code>hop</code></td><td>jumps toward Pip, falls with gravity, bounces off walls</td><td><code>dizzy</code> on landing (shakes the screen)</td></tr><tr><td><code>dizzy</code></td><td>stars circle his head: <strong>the only time a stomp hurts him</strong></td><td><code>wait</code> when the timer runs out</td></tr><tr><td><code>dying</code></td><td>explodes for 2 seconds</td><td>the <code>win</code> state</td></tr></tbody></table></div>
 <figure class="code"><div class="code-label">lesson 19 · at the top, outside the functions</div><button class="copy" type="button">Copy</button><pre><code><span class="add"><span class="c">-- King Glob is 16x16: each frame is 2x2 sprites starting at these ids</span></span>
 <span class="add"><span class="k">local</span> SPR_BOSS = <span class="n">320</span></span>
@@ -16162,7 +16161,7 @@ SPAWN = {
 <span class="k">end</span></code></pre></figure>
 <p>Read it mode by mode. At the end, touching King Glob from above always bounces Pip off, but only hurts him while he's dizzy; touching him any other way hurts Pip, except while he's dizzy (then he's harmless).</p>
 <h4>Getting angrier</h4>
-<p><code>angry</code> is true when he has half his health or less. Then everything gets harder: he jumps higher and faster, rests less, and every landing calls in two slimes. Changing a fight halfway through keeps it exciting.</p>
+<p><code>angry</code> is true when he has half his health or less. Then everything gets harder: he jumps higher and faster, rests less, and every landing calls in two slimes.</p>
 <h3 id="l19-s5"><span class="step">Step 5</span> Hitting the boss</h3>
 <p>King Glob's sounds are SFX 8 (hit) and 9 (explosion) from lesson 15's table: make them now if you skipped them.</p>
 <figure class="code"><div class="code-label">lesson 19 · new function</div><button class="copy" type="button">Copy</button><pre><code><span class="k">function</span> hit_boss(e)
@@ -16189,7 +16188,7 @@ SPAWN = {
 <span class="k">end</span></code></pre></figure>
 <p>The red bar is <code>100 * boss.hp // BOSS_HP</code> pixels wide: the full 100 at 6 hit points, 50 at 3. Call <code>draw_boss_bar()</code> at the end of <code>draw_play</code>, after the HUD.</p>
 <h3 id="l19-s7"><span class="step">Step 7</span> Screen shake</h3>
-<p>A big landing feels bigger when the screen shakes. <code>shake</code> counts frames; while it's above 0, <code>update_camera</code> nudges the camera by a random amount:</p>
+<p>The screen shakes on a big landing. <code>shake</code> counts frames; while it's above 0, <code>update_camera</code> nudges the camera by a random amount:</p>
 <figure class="code"><div class="code-label">lesson 19 · in update_camera(), at the end</div><button class="copy" type="button">Copy</button><pre><code><span class="add">  <span class="k">if</span> shake &gt; <span class="n">0</span> <span class="k">then</span>                 <span class="c">-- screen shake: nudge the camera at random</span></span>
 <span class="add">    shake = shake - <span class="n">1</span></span>
 <span class="add">    cam.x = cam.x + <span class="a">math</span>.random(-<span class="n">2</span>, <span class="n">2</span>)</span>
@@ -16229,7 +16228,7 @@ SPAWN = {
 <details class="hint"><summary>Hint</summary>
 <p>Reuse <code>new_bullet(x, y, vx)</code> from lesson 14: one with <code>vx = -2</code> and one with <code>vx = 2</code>, at floor height.</p>
 </details>
-<details class="example"><summary>See what it might look like</summary><p>Every time King Glob lands, two bullets (new_bullet with vx -2 and 2) slide away from him along the floor: jump over them with <kbd>Z</kbd>. To get to the throne room fast, this example starts there.</p><figure class="play-embed example-play" data-src="play/player.html?cart=ch-19-ground-pound&amp;autostart=1"><div class="screen"><img src="media/ch-19-ground-pound.gif" alt="" loading="lazy"><button type="button" class="play-btn">▶ Run it</button></div><figcaption>One possible result, not the only right answer. Run it, click the game, then play. <a href="play/player.html?cart=ch-19-ground-pound" target="_blank" rel="noopener">Open it in a new tab</a>.</figcaption></figure></details>
+<details class="example"><summary>See what it might look like</summary><p>Every time King Glob lands, two bullets (new_bullet with vx -2 and 2) slide away from him along the floor: jump over them with <kbd>Z</kbd>. This example starts in the throne room.</p><figure class="play-embed example-play" data-src="play/player.html?cart=ch-19-ground-pound&amp;autostart=1"><div class="screen"><img src="media/ch-19-ground-pound.gif" alt="" loading="lazy"><button type="button" class="play-btn">▶ Run it</button></div><figcaption>One possible result, not the only right answer. Run it, click the game, then play. <a href="play/player.html?cart=ch-19-ground-pound" target="_blank" rel="noopener">Open it in a new tab</a>.</figcaption></figure></details>
 </section>
 <section class="challenge"><h4><span class="tag">Challenge</span> Phase three</h4>
 <p>Add a third phase below 2 hit points: King Glob turns another color (use the palette map from lesson 17) and does two hops in a row before getting dizzy.</p>
@@ -17990,7 +17989,7 @@ SPAWN = {
   </div>
   <div class="body">
 <h3 id="l20-s1"><span class="step">Step 1</span> Polish: what makes a game feel finished</h3>
-<p>The game works. Polish is the many small things that make it <em>feel</em> good: the screen fading in, dust under Pip's feet, a title screen that remembers you, an ending that says thank you. None of them is big; together they make the difference.</p>
+<p>The game works. Polish is the many small things that make it <em>feel</em> good: the screen fading in, dust under Pip's feet, a title screen that remembers you, an ending that says thank you.</p>
 <h3 id="l20-s2"><span class="step">Step 2</span> Saving progress with pmem</h3>
 <p>A player who reached the Sky Tower shouldn't have to start from the meadow every time. TIC-80 gives every cart <strong>256 numbers that are kept when the game is turned off</strong>: <code>pmem(slot)</code> reads one, <code>pmem(slot, value)</code> writes it. (In the browser they're kept in the browser's storage, per game.)</p>
 <p>New and changed definitions outside the functions (constants, tables, variables): add these to your cart, or replace the old version of the same lines.</p><figure class="code"><div class="code-label">lesson 20</div><button class="copy" type="button">Copy</button><pre><code><span class="c">-- == Constants ==</span>
@@ -18185,7 +18184,7 @@ menu_pos = <span class="n">1</span>           <span class="c">-- title menu: 1 =
 <p>Once the cart has a <code>-- menu:</code> line, the game keeps <kbd>Esc</kbd> and the F keys while it runs, even when you start it with <kbd>Ctrl</kbd><kbd>R</kbd>: <kbd>Esc</kbd> opens the menu instead of going back to the editor. To get back to the editor, choose <strong>CLOSE GAME</strong> in that menu.</p>
 </aside>
 <h3 id="l20-s7"><span class="step">Step 7</span> The ending</h3>
-<p>The win screen is the last thing a player sees: make it count. It says who made the game, and thanks the player:</p>
+<p>The win screen is the last thing a player sees. It says who made the game, and thanks the player:</p>
 <figure class="code"><div class="code-label">lesson 20 · replaces your draw_win(); new lines marked</div><button class="copy" type="button">Copy</button><pre><code><span class="k">function</span> draw_win()
   <span class="a">cls</span>(<span class="n">1</span>)
   print_centered(
@@ -18216,16 +18215,15 @@ menu_pos = <span class="n">1</span>           <span class="c">-- title menu: 1 =
 <p>Before you publish, play the whole game, start to finish, and then ask someone else to play it <strong>without your help</strong>. Watch, don't explain: everywhere they get stuck is something to fix. Check:</p>
 <ul><li>Every level can be finished, and the gems can be reached (some are meant to be tricky, none impossible).</li><li>Losing all lives, then CONTINUE, puts you back at the saved level with full lives.</li><li>The game menu entries work, during play and on the title screen (where they do nothing).</li><li>Sounds and music: nothing is too loud, nothing cuts off the music.</li><li>Nothing happens that depends on how fast the computer is: everything in the game counts frames, not <code>time()</code>.</li><li>The game is fair: the first time a new danger appears, there's room to see it before it hurts.</li></ul>
 <aside class="tip">
-<p>The course's carts were tested with automatic tests too: a script presses buttons for a number of frames and then checks values (<code>player.y</code>, <code>score</code>, <code>mget(...)</code>), so a change that breaks an old feature gets caught. When your game grows, that's worth doing: TIC-80's <code>trace()</code> prints values to the console, which helps you find out what's going on.</p>
+<p>TIC-80's <code>trace()</code> prints values to the console, which helps you find out what's going on.</p>
 </aside>
 <h3 id="l20-s9"><span class="step">Step 9</span> Export for the web</h3>
 <p>TIC-80 can turn a cart into a web page that runs in any browser, with no install. In the console:</p>
 <figure class="code"><button class="copy" type="button">Copy</button><pre><code>save pips-peak
 export html pips-peak</code></pre></figure>
 <p><code>export html</code> downloads the web player from tic80.com (you need an internet connection), puts your cart in it and saves <strong>pips-peak.zip</strong> in your TIC-80 folder (type <code>folder</code> to open it). The zip holds an <code>index.html</code>, the player and your cart.</p>
-<p>In TIC-80 PRO, <code>export html pips-peak alone=1</code> makes a smaller zip, with a player that runs the game only, without the editors.</p>
 <aside class="tip">
-<p>The <code>index.html</code> won't run if you double-click it: browsers don't allow it from a file. Put it on a web server, or try it locally with <code>python3 -m http.server</code> in the unzipped folder and open <code>http://localhost:8000</code>.</p>
+<p>The <code>index.html</code> won't run if you double-click it: browsers don't allow it from a file. It needs a web server: the next step puts it on itch.io.</p>
 </aside>
 <h3 id="l20-s10"><span class="step">Step 10</span> Publish on itch.io</h3>
 <p><a href="https://itch.io">itch.io</a> hosts web games for free.</p>
@@ -18236,14 +18234,14 @@ export html pips-peak</code></pre></figure>
 <figure class="play-embed" data-src="play/player.html?cart=lesson20&amp;autostart=1"><div class="screen"><img src="media/poster-20.png" alt="The finished lesson 20 cart, before it runs" loading="lazy"><button type="button" class="play-btn">▶ Run the lesson 20 cart</button></div><figcaption>What your cart should do at the end of this lesson. Click the game first; then the arrow keys, <kbd>Z</kbd> and <kbd>X</kbd> play it. <a href="play/player.html?cart=lesson20" target="_blank" rel="noopener">Open it in a new tab</a>.</figcaption></figure>
 <figure class="shot"><img src="media/l20-win.png" alt="The ending." loading="lazy" width="240" height="136"><figcaption>The ending.</figcaption></figure>
 <h3 id="l20-s11"><span class="step">Step 11</span> What next?</h3>
-<p>You've built a whole platformer: physics, a camera, tiles and levels, collectibles, enemies, power-ups, sound, music, a boss and a finished, published game. Everything in it is code you wrote and understand, so you can change any of it.</p>
+<p>You've built a whole platformer: physics, a camera, tiles and levels, collectibles, enemies, power-ups, sound, music, a boss and a finished, published game.</p>
 <section class="challenge"><h4><span class="tag">Challenge</span> Make it yours</h4>
 <p>Make a fifth level with your own idea: a new tile with a new flag (wind? water? a tile that only exists every other second?), a new enemy built from the entity pieces, and a new track. Add it to <code>LEVELS</code> before the throne room.</p>
 
 </section>
 <section class="challenge"><h4><span class="tag">Challenge</span> A level timer</h4>
 <p>Show a timer in the HUD, and save the best time for each level in <code>pmem</code> (slots 2-5). Show the best times on the title screen.</p>
-<details class="example"><summary>See what it might look like</summary><p>The HUD shows the level's time (level_t, as minutes, seconds and tenths); finishing a level keeps its time in pmem slot 2-5 if it's the best, and the title screen lists the best times. The picture starts with two best times already saved.</p><figure class="play-embed example-play" data-src="play/player.html?cart=ch-20-level-timer&amp;autostart=1"><div class="screen"><img src="media/ch-20-level-timer.gif" alt="" loading="lazy"><button type="button" class="play-btn">▶ Run it</button></div><figcaption>One possible result, not the only right answer. Run it, click the game, then play. <a href="play/player.html?cart=ch-20-level-timer" target="_blank" rel="noopener">Open it in a new tab</a>.</figcaption></figure></details>
+<details class="example"><summary>See what it might look like</summary><p>The HUD shows the level's time (level_t, as minutes, seconds and tenths); finishing a level keeps its time in pmem slot 2-5 if it's the best, and the title screen lists the best times.</p><figure class="play-embed example-play" data-src="play/player.html?cart=ch-20-level-timer&amp;autostart=1"><div class="screen"><img src="media/ch-20-level-timer.gif" alt="" loading="lazy"><button type="button" class="play-btn">▶ Run it</button></div><figcaption>One possible result, not the only right answer. Run it, click the game, then play. <a href="play/player.html?cart=ch-20-level-timer" target="_blank" rel="noopener">Open it in a new tab</a>.</figcaption></figure></details>
 </section>
 <section class="challenge"><h4><span class="tag">Challenge</span> A second character</h4>
 <p>Draw a second character with different tuning (<code>P</code>): faster but jumping lower, or slower with a double jump of its own. Let the player pick one on the title screen. (Careful with "lower": the levels have steps three tiles high, 24 pixels, so <code>jump_speed</code> can't be weaker than about -3.75.)</p>
@@ -20151,7 +20149,7 @@ SPAWN = {
 <h3>Save often</h3>
 <p>Type <code>save pips-peak</code> in the console once. After that, <kbd>Ctrl</kbd><kbd>S</kbd> saves the cart under that name from anywhere in TIC-80.</p>
 <h3>Where your carts are</h3>
-<p>Type <code>folder</code> in the console. TIC-80 opens the folder it keeps your carts in. Everything you <code>save</code> goes there,. <code>dir</code> lists the files and <code>cd</code> changes folder, inside TIC-80.</p>
+<p>Type <code>folder</code> in the console. TIC-80 opens the folder it keeps your carts in. Everything you <code>save</code> goes there. <code>dir</code> lists the files and <code>cd</code> changes folder, inside TIC-80.</p>
 <p>If you use TIC-80 in a web browser, your carts are kept inside that browser. Use the same browser on the same computer each time.</p>
 <h3>Keep a copy</h3>
 <p>Before a big change, save a copy under another name:</p>
@@ -20204,13 +20202,13 @@ SPAWN = {
   <div class="body">
 <h3 id="art-s1"><span class="step">Step 1</span> 64 pixels</h3>
 <p>A sprite in TIC-80 is 8 x 8 pixels: 64 in all. That's tiny, so every pixel counts. One pixel can be an eye, a shine, a mouth. It's also why 8 x 8 is a great way to learn pixel art: you can try an idea in a minute, and <kbd>Ctrl</kbd><kbd>Z</kbd> takes it back in a second.</p>
-<p>You don't need this lesson for the game. It shows how its pictures were made and how to draw your own. At the bottom is <strong>the whole collection</strong>: every picture in Pip's Peak, each with an animation of it being drawn in TIC-80's sprite editor.</p>
+<p>You don't need this lesson for the game. At the bottom is <strong>the whole collection</strong>: every picture in Pip's Peak, each with an animation of it being drawn in TIC-80's sprite editor.</p>
 <h3 id="art-s2"><span class="step">Step 2</span> Start with the shape</h3>
 <p>Before any detail, draw the <em>silhouette</em>: the shape of the thing, all in one color. If you can tell what it is from the shape alone, it will read in the game too, where it is small and moving.</p>
 <figure class="px-fig"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFEAAABRCAIAAAAl7d1hAAAAsUlEQVR42u3auw2AMAwFQOZAjMAAlJTMgdiR9WCB0BjyISc5lQt0sosnkmHd9t5quM84zakKdpfzSNWn333uMjMzMzMzM9dplsPenOQ/d5uZmZmZmZlZDsuTwyKTLNWN7jYzMzMzMzNzCXOPOazFSUa6zMzMzMzMzHWa5TC7zczMzMzMzCyHuZf0r5eZmZmZmdm9pByW/6Vfq7vNzMzMzMzMLIfJYXabmZmZmZlZDqu5LsVrSnp5j6q4AAAAAElFTkSuQmCC" alt="Pip&#x27;s shape, in one color" width="81" height="81"><figcaption>Pip's shape, in one color</figcaption></figure>
 <figure class="px-fig"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFEAAABRCAIAAAAl7d1hAAAA4UlEQVR42u3asQ3CMBAF0MyBGIGOhoKCkg3SIwagoWQeRmAKZoENgAUuLhyDjZ90qU6R8+IrvuIMu/2htxo+12K5iiqze32eoiq67nSXmZmZmZmZuU6zHDbnTv7nbDMzMzMzMzPLYd/JYZvbMapqu7mzzczMzMzMzPwLc485rNz7ft3PUSW76+0YVfLe6adiZmZmZmZmrtMsh9WyzzndVmebmZmZmZm5b7NzSd96mZmZmZmZmZ1Ltp/Dcv7Wa3W2mZmZmZmZmeWwuXLY4zJGlezm7HO5dZmZmZmZmZnrNPdWb9tfZcjk7uDsAAAAAElFTkSuQmCC" alt="Pip, finished" width="81" height="81"><figcaption>Pip, finished</figcaption></figure>
 <p>Squint at a sprite, or step back from the screen: what's left is the shape. A slime is a blob, a coin is a circle, Pip is a sprout with a leaf and two feet.</p>
-<p>The drawings in this course that start from nothing go the same way: the outline in the main color, the <strong>fill</strong> tool for the inside, then the details on top. Thin things, like the fence, are just lines; a block gets its frame drawn round the edge first.</p>
+<p>A drawing that starts from nothing goes like this: the outline in the main color, the <strong>fill</strong> tool for the inside, then the details on top. Thin things, like the fence, are just lines; a block gets its frame drawn round the edge first.</p>
 <figure class="shot"><img src="media/draw-272.gif" alt="The slime: an arc for the outline, the fill tool for the inside, then the highlight, the eyes and the pupils." loading="lazy" width="240" height="136"><figcaption>The slime: an arc for the outline, the fill tool for the inside, then the highlight, the eyes and the pupils.</figcaption></figure>
 <h3 id="art-s3"><span class="step">Step 3</span> A few colors, picked on purpose</h3>
 <p>TIC-80 has 16 colors, and most sprites here use three or four. Fewer colors make a sprite cleaner, and they make your game look like one world.</p>
