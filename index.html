@@ -20315,24 +20315,6 @@ SPAWN = {
   });
 })();
 
-// In the claude.ai artifact viewer a page can't start downloads itself: PNG carts are
-// offered through the viewer's downloads capability.
-(function () {
-  if (!window.claude || !window.claude.use) return;
-  window.claude.use('downloads').then(function (downloads) {
-    if (!downloads) return;
-    document.addEventListener('click', function (e) {
-      var a = e.target.closest('a[download][href$=".png"]');
-      if (!a) return;
-      e.preventDefault();
-      var name = a.getAttribute('href').split('/').pop();
-      fetch(a.href).then(function (r) { return r.blob(); })
-        .then(function (blob) { return downloads.save({ filename: name, data: blob }); })
-        .catch(function () {});
-    });
-  });
-})();
-
 // The finished lesson cart, run in the page: one at a time, and stopped when
 // you move to another lesson (an iframe that goes away takes its sound with it).
 (function () {
