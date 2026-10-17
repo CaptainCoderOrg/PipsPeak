@@ -1,0 +1,2222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TIC-80 Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Silkscreen&display=swap">
+<style>
+/* The Sound Lab: TIC-80's editor on top, the teaching panels under it. The
+   course's own colors and fonts (coursekit/site.css), light and dark. */
+:root {
+  --bg: #eef1f7;
+  --surface: #ffffff;
+  --ink: #1a1c2c;
+  --muted: #4b5b73;
+  --line: #d3dae7;
+  --accent: #3b5dc9;
+  --accent-ink: #ffffff;
+  --changed: #b13e53;
+  --sun: #ffcd75;
+  --sun-ink: #1a1c2c;
+  --play: #257d45;
+  --play-ink: #ffffff;
+  --bar-off: #d3dae7;
+  --bar-on: #3b5dc9;
+  --bar-now: #ef7d57;
+  --hl: #ffcd75;
+  --font-display: "Silkscreen", "Courier New", monospace;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14151f;
+    --surface: #1e2030;
+    --ink: #eef1f7;
+    --muted: #a9bccc;
+    --line: #333c57;
+    --accent: #41a6f6;
+    --accent-ink: #14151f;
+    --changed: #ef7d57;
+    --bar-off: #333c57;
+    --bar-on: #41a6f6;
+    --bar-now: #ffcd75;
+    --play: #38b764;
+    --play-ink: #14151f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --play: #38b764;
+  --play-ink: #14151f;
+  --bg: #14151f;
+  --surface: #1e2030;
+  --ink: #eef1f7;
+  --muted: #a9bccc;
+  --line: #333c57;
+  --accent: #41a6f6;
+  --accent-ink: #14151f;
+  --changed: #ef7d57;
+  --bar-off: #333c57;
+  --bar-on: #41a6f6;
+  --bar-now: #ffcd75;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 1rem/1.5 var(--font-body);
+  overflow-x: hidden;
+}
+.lab { max-width: 832px; margin: 0 auto; padding: 0 16px 1rem; }
+/* inside the course page, the page's column has the margins */
+.in-page .lab { max-width: none; padding: 0 0 1rem; }
+h1, h2 { font-family: var(--font-display); font-weight: 400; margin: 0; }
+h1 { font-size: 1.15rem; }
+h2 { font-size: 0.95rem; margin-bottom: 0.5rem; }
+p { margin: 0.4rem 0; }
+kbd {
+  font: 0.85em var(--font-mono);
+  border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px;
+  padding: 0 0.3em; background: var(--surface);
+}
+code { font: 0.9em var(--font-mono); }
+
+button { font: inherit; color: inherit; }
+.btn {
+  font: 700 0.9rem var(--font-body);
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 6px;
+  padding: 0.35rem 0.75rem; cursor: pointer;
+}
+.btn:hover { border-color: var(--accent); }
+.btn:focus-visible, .chip:focus-visible, .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn.primary { background: var(--sun); color: var(--sun-ink); border-color: transparent; }
+.btn.play { background: var(--play); color: var(--play-ink); border-color: transparent; }
+.btn[disabled] { opacity: 0.5; cursor: default; }
+.btn.small { font-size: 0.8rem; padding: 0.15rem 0.5rem; }
+
+/* the title row: the two editors as tabs, then the whole-cart buttons */
+.bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem;
+  padding: 0.6rem 0;
+}
+.tabs { display: flex; gap: 0.25rem; }
+.tab {
+  font: 700 0.9rem var(--font-body);
+  border: 1px solid var(--line); border-radius: 6px; background: transparent;
+  padding: 0.3rem 0.7rem; cursor: pointer; color: var(--muted);
+}
+.tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.bar .actions { margin-left: auto; display: flex; gap: 0.5rem; }
+
+/* TIC-80's picture: 256x144 with its border, filling a 16:9 box */
+.screen {
+  position: relative;
+  aspect-ratio: 256 / 144;
+  background: #1a1c2c;
+  border-radius: 8px;
+  overflow: hidden;
+}
+#canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  display: block; image-rendering: pixelated; touch-action: none; outline: none;
+}
+.screen:focus-within { box-shadow: 0 0 0 2px var(--accent); }
+.loading {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: #f4f4f4; font: 1rem var(--font-display); background: #1a1c2c; text-align: center; padding: 1rem;
+}
+/* the part of the editor a label is about */
+.hl {
+  position: absolute; pointer-events: none;
+  border: 2px solid var(--hl); border-radius: 3px;
+  box-shadow: 0 0 0 2px rgba(26, 28, 44, 0.7), 0 0 12px var(--hl);
+}
+.pointing {
+  min-height: 3em; margin: 0.5rem 0 0.75rem; padding: 0.4rem 0.7rem;
+  border-left: 4px solid var(--hl); background: var(--surface); border-radius: 0 6px 6px 0;
+}
+.pointing b { font-family: var(--font-display); font-weight: 400; }
+
+.away {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;
+  margin: 0 0 0.75rem; padding: 0.5rem 0.7rem; border-radius: 6px;
+  background: var(--sun); color: var(--sun-ink);
+}
+
+.panels { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0.75rem; }
+.panel {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+  padding: 0.75rem; min-width: 0;
+}
+.panel.wide { grid-column: 1 / -1; }
+.hint { color: var(--muted); font-size: 0.9rem; }
+
+/* the cart's sounds and songs, by name */
+.chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.group-name { font-size: 0.85rem; color: var(--muted); margin: 0.5rem 0 0.25rem; }
+.chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--bg);
+  padding: 0.2rem 0.65rem 0.2rem 0.25rem; cursor: pointer; font-size: 0.9rem;
+}
+.chip .n {
+  min-width: 1.6rem; text-align: center; border-radius: 999px; padding: 0 0.3rem;
+  background: var(--line); font: 700 0.8rem var(--font-mono);
+}
+.chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+.chip[aria-pressed="true"] .n { background: rgba(255, 255, 255, 0.25); }
+.chip.changed::after { content: "changed"; font-size: 0.7rem; font-weight: 700; color: var(--changed); }
+.chip[aria-pressed="true"].changed::after { color: inherit; }
+
+/* now playing: one bar per tick, as loud as that tick */
+.ticks { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); gap: 2px; align-items: end; height: 48px; margin: 0.5rem 0 0.2rem; }
+.ticks i { display: block; background: var(--bar-off); border-radius: 1px; min-height: 2px; }
+.ticks i.on { background: var(--bar-on); }
+.ticks i.now { background: var(--bar-now); }
+.ticks i.skip { opacity: 0.3; }
+.tick-scale { display: flex; justify-content: space-between; font: 0.75rem var(--font-mono); color: var(--muted); }
+.status { font-weight: 700; margin: 0.3rem 0; }
+.status.playing { color: var(--play); }
+.facts { margin: 0.4rem 0 0; padding-left: 1.1rem; }
+.facts li { margin: 0.15rem 0; }
+.row { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-top: 0.5rem; }
+
+/* music: progress through the frame's rows */
+.meter { height: 8px; background: var(--bar-off); border-radius: 4px; overflow: hidden; margin: 0.4rem 0; }
+.meter i { display: block; height: 100%; width: 0; background: var(--bar-on); }
+
+.channels { display: grid; gap: 0.4rem; }
+.channel {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0.5rem; align-items: center;
+  padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 6px;
+}
+.channel .num { font: 700 0.85rem var(--font-mono); width: 1.6rem; height: 1.6rem; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; background: var(--line); }
+.channel.sounding .num { background: var(--play); color: var(--play-ink); }
+.channel.off { border-style: dashed; }
+.channel.off .num { background: transparent; border: 1px dashed var(--muted); }
+.channel .what { font-size: 0.9rem; overflow-wrap: anywhere; }
+.channel .what small { display: block; color: var(--muted); }
+.channel .btns { display: flex; gap: 0.3rem; }
+.channel .btn[aria-pressed="true"] { background: var(--changed); color: #fff; border-color: transparent; }
+
+.changes { margin: 0.3rem 0; padding-left: 1.1rem; }
+.changes li { margin: 0.2rem 0; }
+.changes .btn { margin-left: 0.4rem; }
+
+/* what each part of the editor is */
+.legend { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0.25rem 1rem; }
+.legend button {
+  display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: 6px;
+  padding: 0.3rem 0.4rem; cursor: pointer; font-size: 0.9rem;
+}
+.legend button:hover, .legend button.active { background: var(--bg); }
+.legend button:focus-visible { background: var(--bg); outline: 2px solid var(--accent); outline-offset: 0; }
+.legend b { font-family: var(--font-display); font-weight: 400; }
+
+.saved-panel { margin: 0 0 0.75rem; border-color: var(--sun); border-width: 2px; }
+.saved-panel ol { margin: 0.3rem 0; padding-left: 1.3rem; }
+
+@media (max-width: 640px) {
+  .panels, .legend { grid-template-columns: minmax(0, 1fr); }
+  .bar .actions { margin-left: 0; }
+}
+[hidden] { display: none !important; }
+
+details.panel > summary { cursor: pointer; list-style: none; }
+details.panel > summary::-webkit-details-marker { display: none; }
+details.panel > summary h2 { display: inline; }
+details.panel > summary::before { content: "▸ "; color: var(--accent); }
+details.panel[open] > summary::before { content: "▾ "; }
+details.panel > summary .hint { margin-left: 0.4rem; }
+details.panel[open] > summary { margin-bottom: 0.5rem; }
+
+/* the labs' panels stack with the same gap they have inside */
+#editor-panels > .panels, #editor-panels + .panels { margin-top: 0.75rem; }
+
+/* pictures: chips with a small picture, the big view (see-through shows as a checkerboard) */
+.chip.pic { padding-left: 0.3rem; }
+.chip canvas, .thumb { image-rendering: pixelated; display: block; }
+.chip.pic canvas { width: 16px; height: 16px; }
+.big-pic {
+  display: block; width: 96px; height: 96px; image-rendering: pixelated; border-radius: 4px;
+  background: repeating-conic-gradient(var(--line) 0% 25%, var(--surface) 0% 50%) 0 0 / 12px 12px;
+  border: 1px solid var(--line);
+}
+.anim { display: flex; gap: 0.75rem; align-items: center; }
+.dot { display: inline-block; width: 0.8em; height: 0.8em; border-radius: 2px; border: 1px solid var(--line); margin: 0 0.25em 0 0.1em; vertical-align: -0.1em; }
+.pic-change { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; }
+.pic-change canvas { width: 24px; height: 24px; image-rendering: pixelated; border: 1px solid var(--line); }
+.swatches { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 0.3rem; }
+.swatch { border: 1px solid var(--line); border-radius: 6px; background: var(--bg); padding: 0.2rem; cursor: pointer; }
+.swatch .sw { display: block; height: 1.4rem; border-radius: 3px; border: 1px solid var(--muted); }
+.swatch .n { display: block; font: 0.75rem var(--font-mono); text-align: center; }
+.swatch.changed { border-color: var(--changed); border-width: 2px; }
+.swatch:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* the map: levels, the whole world small, the cell under the mouse */
+.levels { display: grid; gap: 0.35rem; margin-bottom: 0.6rem; }
+.level { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.minimap { position: relative; width: 100%; max-width: 720px; aspect-ratio: 240 / 136; background: #1a1c2c; border-radius: 6px; overflow: hidden; }
+.minimap canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; cursor: crosshair; }
+.mm-level { position: absolute; border: 1px dashed rgba(255, 255, 255, 0.7); pointer-events: none; }
+.mm-level span { position: absolute; left: 2px; top: 1px; font: 0.7rem var(--font-body); color: #fff; text-shadow: 0 1px 2px #000, 0 0 3px #000; white-space: nowrap; }
+.mm-view { position: absolute; border: 2px solid var(--hl); box-shadow: 0 0 0 1px #1a1c2c; pointer-events: none; }
+.cell { display: flex; gap: 0.6rem; align-items: flex-start; }
+.cell-pic { width: 48px; height: 48px; image-rendering: pixelated; border: 1px solid var(--line); flex: none; }
+.cell .facts { margin: 0; }
+.brush { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.6rem; font-size: 0.9rem; }
+.cell-pic.small { width: 24px; height: 24px; }
+.pics { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.anim-text { font-size: 0.9rem; }
+#reset-all.armed { background: var(--changed); color: #fff; border-color: transparent; }
+.touch-note { margin: 0 0 0.6rem; padding: 0.4rem 0.7rem; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); font-size: 0.9rem; }
+.lab.running .when-editing { visibility: hidden; }
+.chip .tag { font: 700 0.65rem var(--font-body); letter-spacing: 0.02em; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 0.25rem; }
+.chip[aria-pressed="true"] .tag { color: inherit; border-color: currentColor; }
+.swatch[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+</style>
+</head>
+<body>
+<main class="lab">
+  <header class="bar">
+    <h1 id="title">TIC-80 Lab</h1>
+    <div class="tabs" id="tabs" role="tablist" aria-label="Editor"></div>
+    <div class="actions">
+      <button type="button" class="btn play" id="try" disabled>▶ Try it in the game</button>
+      <button type="button" class="btn" id="reset-all" disabled>Reset everything</button>
+      <button type="button" class="btn primary" id="save" disabled>Save</button>
+    </div>
+  </header>
+
+  <p class="touch-note" id="touch-note" hidden>On a phone or tablet you can look around, listen and tap the lists below;
+    drawing, painting and typing work best with a mouse and keyboard.</p>
+
+  <section class="panel saved-panel" id="save-help" hidden>
+    <h2>Your changes in your game</h2>
+    <div id="save-text"></div>
+    <button type="button" class="btn small" id="save-close">OK, got it</button>
+  </section>
+
+  <div class="screen" id="screen">
+    <canvas id="canvas" tabindex="0" aria-label="TIC-80" oncontextmenu="event.preventDefault()"></canvas>
+    <div class="loading" id="loading">Starting TIC-80…</div>
+  </div>
+  <p class="pointing" id="pointing"></p>
+  <p class="away" id="away" hidden>
+    <span id="away-text"></span>
+    <button type="button" class="btn small" id="back">Back</button>
+  </p>
+
+  <div id="editor-panels"></div>
+
+  <div class="panels">
+    <details class="panel wide" id="legend-box">
+      <summary><h2>What's on the screen</h2><span class="hint">every part of the editor, explained</span></summary>
+      <ul class="legend" id="legend"></ul>
+    </details>
+  </div>
+</main>
+
+<script id="lab-data" type="application/json">{"sfx": {"0": "jump", "1": "coin", "2": "stomp", "3": "hurt", "4": "power-up", "5": "bump", "6": "spring", "7": "shoot", "8": "boss hit", "9": "explosion", "10": "checkpoint", "11": "1-up", "12": "gem", "13": "menu", "14": "lose a life", "16": "lead", "17": "bass", "18": "kick", "19": "snare", "20": "hi-hat", "21": "pad", "22": "lead 2", "23": "bell"}, "waves": {"0": "noise", "1": "square", "2": "pulse", "3": "thin pulse", "4": "triangle", "5": "saw", "6": "sine"}, "tracks": {"0": "title", "1": "overworld", "2": "cave", "3": "boss", "4": "level clear", "5": "game over", "6": "victory"}, "patterns": {"1": "overworld melody A", "2": "overworld melody B", "3": "overworld bass A", "4": "overworld bass B", "5": "overworld drums", "6": "cave melody", "7": "cave bass", "8": "cave drums", "9": "boss melody", "10": "boss bass", "11": "boss drums", "12": "title melody", "13": "title pad", "14": "level clear", "15": "level clear bass", "16": "game over", "17": "game over bass", "18": "victory", "19": "victory bass"}, "snd": {"lesson02": {}, "lesson03": {}, "lesson04": {}, "lesson06": {}, "lesson15": {"0": "JUMP", "1": "COIN", "2": "STOMP", "3": "HURT", "7": "SHOOT", "10": "CHECKPOINT", "11": "ONE_UP", "12": "GEM", "13": "MENU", "14": "DIE"}, "lesson16": {"0": "JUMP", "1": "COIN", "2": "STOMP", "3": "HURT", "7": "SHOOT", "10": "CHECKPOINT", "11": "ONE_UP", "12": "GEM", "13": "MENU", "14": "DIE"}, "lesson18": {"0": "JUMP", "1": "COIN", "2": "STOMP", "3": "HURT", "4": "POWER_UP", "5": "BUMP", "6": "SPRING", "7": "SHOOT", "10": "CHECKPOINT", "11": "ONE_UP", "12": "GEM", "13": "MENU", "14": "DIE"}, "lesson20": {"0": "JUMP", "1": "COIN", "2": "STOMP", "3": "HURT", "4": "POWER_UP", "5": "BUMP", "6": "SPRING", "7": "SHOOT", "8": "BOSS_HIT", "9": "EXPLODE", "10": "CHECKPOINT", "11": "ONE_UP", "12": "GEM", "13": "MENU", "14": "DIE"}}, "art": {"1": "grass top-left", "2": "grass top", "3": "grass top-right", "4": "dirt left", "5": "dirt", "6": "dirt right", "7": "cave rock top", "8": "cave rock", "9": "castle brick", "10": "ice", "11": "wood platform (one-way)", "12": "cloud platform (one-way)", "13": "spikes", "14": "lava A", "15": "lava B", "16": "?-block: coin", "17": "?-block: heart", "18": "?-block: feather", "19": "?-block: boots", "20": "?-block: star", "21": "used block", "23": "metal block", "24": "bush", "25": "flower", "26": "tall grass", "27": "crystal", "28": "fence", "29": "cloud left", "30": "cloud middle", "31": "cloud right", "32": "cave wall (background)", "33": "castle wall (background)", "34": "arrow sign", "48": "coin (marker)", "49": "gem (marker)", "50": "player start (marker)", "51": "checkpoint (marker)", "52": "goal (marker)", "53": "slime (marker)", "54": "bat (marker)", "55": "turret (marker)", "56": "spiky (marker)", "57": "spring (marker)", "58": "moving platform \u2192 (marker)", "59": "moving platform \u2195 (marker)", "60": "boss (marker)", "256": "Pip idle", "257": "Pip idle (breathe)", "258": "Pip run 1", "259": "Pip run 2", "260": "Pip run 3", "261": "Pip run 4", "262": "Pip jump", "263": "Pip fall", "264": "Pip hurt", "265": "Pip squash", "272": "slime 1", "273": "slime 2", "274": "slime flat", "275": "bat 1", "276": "bat 2", "277": "turret", "278": "bullet", "279": "spiky 1", "280": "spiky 2", "288": "coin 1", "289": "coin 2", "290": "coin 3", "291": "coin 4", "292": "gem", "293": "heart", "294": "feather", "295": "boots", "296": "star", "297": "checkpoint (down)", "298": "checkpoint (up)", "299": "goal flag (top)", "315": "goal flag (pole)", "301": "spring (down)", "302": "spring (up)", "303": "moving platform", "320": "King Glob (tl)", "321": "King Glob (tr)", "336": "King Glob (bl)", "337": "King Glob (br)", "322": "King Glob squish (tl)", "323": "King Glob squish (tr)", "338": "King Glob squish (bl)", "339": "King Glob squish (br)", "324": "King Glob hurt (tl)", "325": "King Glob hurt (tr)", "340": "King Glob hurt (bl)", "341": "King Glob hurt (br)", "352": "HUD heart", "353": "HUD heart (empty)", "354": "HUD coin", "355": "HUD gem", "356": "HUD feather", "357": "HUD boots", "358": "HUD star", "359": "HUD Pip"}, "colors": ["black", "purple", "red", "orange", "yellow", "lime", "green", "teal", "navy", "blue", "sky", "cyan", "white", "silver", "gray", "slate"], "flags": {"0": ["SOLID", "Pip stands on it and can't walk through it", 7], "1": ["HAZARD", "it hurts Pip", 12], "2": ["ONE-WAY", "Pip jumps up through it from below and lands on top", 18], "3": ["ICE", "slippery: Pip slides on it", 18], "4": ["BONUS", "a block to bump from below for a prize", 17]}, "markers": {"new_coin": "a coin: Pip collects it", "new_gem": "a gem: each level hides three", "new_checkpoint": "a checkpoint: after losing a heart, Pip comes back here", "new_slime": "a slime: it walks and turns around; jump on it", "new_bat": "a bat: it flies to and fro in a wave", "new_turret": "a turret: it shoots at Pip", "new_spiky": "a spiky: it walks, and never jump on it", "new_goal": "the goal flag: touching it finishes the level", "new_spring": "a spring: it bounces Pip up high", "new_platform": "a moving platform: Pip can ride it"}, "hero": "Pip", "levels": [{"name": "Green Meadow", "x": 0, "y": 0, "w": 120, "h": 17, "lesson": 6, "n": 1, "bg": 0}, {"name": "Crystal Cave", "x": 0, "y": 17, "w": 120, "h": 17, "lesson": 18, "n": 2, "bg": 32}, {"name": "Sky Tower", "x": 120, "y": 0, "w": 60, "h": 34, "lesson": 18, "n": 3, "bg": 0}, {"name": "Throne Room", "x": 0, "y": 34, "w": 30, "h": 17, "lesson": 19, "n": 4, "bg": 33}], "code": {"lesson02": {"names": {"256": ["PIP"]}, "anims": [], "spawn": {}, "play": null, "keys": "the arrow keys", "gameNote": "", "firstScreen": false, "snd": {}}, "lesson03": {"names": {"256": ["ANIM_IDLE (frame 1 of 2)"], "257": ["ANIM_IDLE (frame 2 of 2)"], "258": ["ANIM_RUN (frame 1 of 4)"], "259": ["ANIM_RUN (frame 2 of 4)"], "260": ["ANIM_RUN (frame 3 of 4)"], "261": ["ANIM_RUN (frame 4 of 4)"]}, "anims": [{"name": "ANIM_IDLE", "frames": [256, 257], "speed": 30}, {"name": "ANIM_RUN", "frames": [258, 259, 260, 261], "speed": 6}], "spawn": {}, "play": null, "keys": "the arrow keys", "gameNote": "", "firstScreen": false, "snd": {}}, "lesson04": {"names": {"256": ["ANIM_IDLE (frame 1 of 2)"], "257": ["ANIM_IDLE (frame 2 of 2)"], "258": ["ANIM_RUN (frame 1 of 4)"], "259": ["ANIM_RUN (frame 2 of 4)"], "260": ["ANIM_RUN (frame 3 of 4)"], "261": ["ANIM_RUN (frame 4 of 4)"]}, "anims": [{"name": "ANIM_IDLE", "frames": [256, 257], "speed": 30}, {"name": "ANIM_RUN", "frames": [258, 259, 260, 261], "speed": 6}], "spawn": {}, "play": null, "keys": "the arrow keys and Z", "gameNote": "Z switches between day and night, which changes some colors while the game runs.", "firstScreen": false, "snd": {}}, "lesson06": {"names": {"256": ["ANIM_IDLE (frame 1 of 2)"], "257": ["ANIM_IDLE (frame 2 of 2)"], "258": ["ANIM_RUN (frame 1 of 4)"], "259": ["ANIM_RUN (frame 2 of 4)"], "260": ["ANIM_RUN (frame 3 of 4)"], "261": ["ANIM_RUN (frame 4 of 4)"], "262": ["SPR_JUMP"], "263": ["SPR_FALL"]}, "anims": [{"name": "ANIM_IDLE", "frames": [256, 257], "speed": 30}, {"name": "ANIM_RUN", "frames": [258, 259, 260, 261], "speed": 6}], "spawn": {}, "play": null, "keys": "the arrow keys and Z", "gameNote": "", "firstScreen": true, "snd": {}}, "lesson15": {"names": {"256": ["ANIM_IDLE (frame 1 of 2)"], "257": ["ANIM_IDLE (frame 2 of 2)"], "258": ["ANIM_RUN (frame 1 of 4)"], "259": ["ANIM_RUN (frame 2 of 4)"], "260": ["ANIM_RUN (frame 3 of 4)"], "261": ["ANIM_RUN (frame 4 of 4)"], "262": ["SPR_JUMP"], "263": ["SPR_FALL"], "265": ["SPR_SQUASH"], "264": ["SPR_HURT"], "288": ["ANIM_COIN (frame 1 of 4)"], "289": ["ANIM_COIN (frame 2 of 4)"], "290": ["ANIM_COIN (frame 3 of 4)"], "291": ["ANIM_COIN (frame 4 of 4)"], "292": ["SPR_GEM"], "354": ["SPR_HUD_COIN"], "355": ["SPR_HUD_GEM"], "352": ["SPR_HEART"], "353": ["SPR_HEART_EMPTY"], "359": ["SPR_HUD_PIP"], "297": ["SPR_CHECK_DOWN"], "298": ["SPR_CHECK_UP"], "272": ["ANIM_SLIME (frame 1 of 2)"], "273": ["ANIM_SLIME (frame 2 of 2)"], "274": ["SPR_SLIME_FLAT"], "275": ["ANIM_BAT (frame 1 of 2)"], "276": ["ANIM_BAT (frame 2 of 2)"], "277": ["SPR_TURRET"], "278": ["SPR_BULLET"], "279": ["ANIM_SPIKY (frame 1 of 2)"], "280": ["ANIM_SPIKY (frame 2 of 2)"], "50": ["M_START"], "48": ["M_COIN"], "49": ["M_GEM"], "51": ["M_CHECKPOINT"], "53": ["M_SLIME"], "54": ["M_BAT"], "55": ["M_TURRET"], "56": ["M_SPIKY"]}, "anims": [{"name": "ANIM_IDLE", "frames": [256, 257], "speed": 30}, {"name": "ANIM_RUN", "frames": [258, 259, 260, 261], "speed": 6}, {"name": "ANIM_COIN", "frames": [288, 289, 290, 291], "speed": 8}, {"name": "ANIM_SLIME", "frames": [272, 273], "speed": 12}, {"name": "ANIM_BAT", "frames": [275, 276], "speed": 6}, {"name": "ANIM_SPIKY", "frames": [279, 280], "speed": 10}], "spawn": {"50": "start", "48": "new_coin", "49": "new_gem", "51": "new_checkpoint", "53": "new_slime", "54": "new_bat", "55": "new_turret", "56": "new_spiky"}, "play": "score, coins, gems, lives = 0, 0, 0, 3 load_level({n}) set_state(\"play\")", "keys": "the arrow keys and Z", "gameNote": "", "firstScreen": false, "snd": {"0": "JUMP", "1": "COIN", "2": "STOMP", "3": "HURT", "7": "SHOOT", "10": "CHECKPOINT", "11": "ONE_UP", "12": "GEM", "13": "MENU", "14": "DIE"}}, "lesson16": {"names": {"256": ["ANIM_IDLE (frame 1 of 2)"], "257": ["ANIM_IDLE (frame 2 of 2)"], "258": ["ANIM_RUN (frame 1 of 4)"], "259": ["ANIM_RUN (frame 2 of 4)"], "260": ["ANIM_RUN (frame 3 of 4)"], "261": ["ANIM_RUN (frame 4 of 4)"], "262": ["SPR_JUMP"], "263": ["SPR_FALL"], "265": ["SPR_SQUASH"], "264": ["SPR_HURT"], "288": ["ANIM_COIN (frame 1 of 4)"], "289": ["ANIM_COIN (frame 2 of 4)"], "290": ["ANIM_COIN (frame 3 of 4)"], "291": ["ANIM_COIN (frame 4 of 4)"], "292": ["SPR_GEM"], "354": ["SPR_HUD_COIN"], "355": ["SPR_HUD_GEM"], "352": ["SPR_HEART"], "353": ["SPR_HEART_EMPTY"], "359": ["SPR_HUD_PIP"], "297": ["SPR_CHECK_DOWN"], "298": ["SPR_CHECK_UP"], "272": ["ANIM_SLIME (frame 1 of 2)"], "273": ["ANIM_SLIME (frame 2 of 2)"], "274": ["SPR_SLIME_FLAT"], "275": ["ANIM_BAT (frame 1 of 2)"], "276": ["ANIM_BAT (frame 2 of 2)"], "277": ["SPR_TURRET"], "278": ["SPR_BULLET"], "279": ["ANIM_SPIKY (frame 1 of 2)"], "280": ["ANIM_SPIKY (frame 2 of 2)"], "50": ["M_START"], "48": ["M_COIN"], "49": ["M_GEM"], "51": ["M_CHECKPOINT"], "53": ["M_SLIME"], "54": ["M_BAT"], "55": ["M_TURRET"], "56": ["M_SPIKY"]}, "anims": [{"name": "ANIM_IDLE", "frames": [256, 257], "speed": 30}, {"name": "ANIM_RUN", "frames": [258, 259, 260, 261], "speed": 6}, {"name": "ANIM_COIN", "frames": [288, 289, 290, 291], "speed": 8}, {"name": "ANIM_SLIME", "frames": [272, 273], "speed": 12}, {"name": "ANIM_BAT", "frames": [275, 276], "speed": 6}, {"name": "ANIM_SPIKY", "frames": [279, 280], "speed": 10}], "spawn": {"50": "start", "48": "new_coin", "49": "new_gem", "51": "new_checkpoint", "53": "new_slime", "54": "new_bat", "55": "new_turret", "56": "new_spiky"}, "play": "score, coins, gems, lives = 0, 0, 0, 3 load_level({n}) set_state(\"play\")", "keys": "the arrow keys and Z", "gameNote": "", "firstScreen": false, "snd": {"0": "JUMP", "1": "COIN", "2": "STOMP", "3": "HURT", "7": "SHOOT", "10": "CHECKPOINT", "11": "ONE_UP", "12": "GEM", "13": "MENU", "14": "DIE"}}, "lesson18": {"names": {"256": ["ANIM_IDLE (frame 1 of 2)"], "257": ["ANIM_IDLE (frame 2 of 2)"], "258": ["ANIM_RUN (frame 1 of 4)"], "259": ["ANIM_RUN (frame 2 of 4)"], "260": ["ANIM_RUN (frame 3 of 4)"], "261": ["ANIM_RUN (frame 4 of 4)"], "262": ["SPR_JUMP"], "263": ["SPR_FALL"], "265": ["SPR_SQUASH"], "264": ["SPR_HURT"], "288": ["ANIM_COIN (frame 1 of 4)"], "289": ["ANIM_COIN (frame 2 of 4)"], "290": ["ANIM_COIN (frame 3 of 4)"], "291": ["ANIM_COIN (frame 4 of 4)"], "292": ["SPR_GEM"], "354": ["SPR_HUD_COIN"], "355": ["SPR_HUD_GEM"], "352": ["SPR_HEART"], "353": ["SPR_HEART_EMPTY"], "359": ["SPR_HUD_PIP"], "297": ["SPR_CHECK_DOWN"], "298": ["SPR_CHECK_UP"], "272": ["ANIM_SLIME (frame 1 of 2)"], "273": ["ANIM_SLIME (frame 2 of 2)"], "274": ["SPR_SLIME_FLAT"], "275": ["ANIM_BAT (frame 1 of 2)"], "276": ["ANIM_BAT (frame 2 of 2)"], "277": ["SPR_TURRET"], "278": ["SPR_BULLET"], "279": ["ANIM_SPIKY (frame 1 of 2)"], "280": ["ANIM_SPIKY (frame 2 of 2)"], "356": ["SPR_HUD_FEATHER"], "357": ["SPR_HUD_BOOTS"], "358": ["SPR_HUD_STAR"], "301": ["SPR_SPRING_DOWN"], "302": ["SPR_SPRING_UP"], "303": ["SPR_PLATFORM"], "299": ["SPR_GOAL"], "14": ["T_LAVA_A"], "15": ["T_LAVA_B"], "50": ["M_START"], "48": ["M_COIN"], "49": ["M_GEM"], "51": ["M_CHECKPOINT"], "53": ["M_SLIME"], "54": ["M_BAT"], "55": ["M_TURRET"], "56": ["M_SPIKY"], "52": ["M_GOAL"], "57": ["M_SPRING"], "58": ["M_PLATFORM_H"], "59": ["M_PLATFORM_V"], "21": ["T_USED_BLOCK"]}, "anims": [{"name": "ANIM_IDLE", "frames": [256, 257], "speed": 30}, {"name": "ANIM_RUN", "frames": [258, 259, 260, 261], "speed": 6}, {"name": "ANIM_COIN", "frames": [288, 289, 290, 291], "speed": 8}, {"name": "ANIM_SLIME", "frames": [272, 273], "speed": 12}, {"name": "ANIM_BAT", "frames": [275, 276], "speed": 6}, {"name": "ANIM_SPIKY", "frames": [279, 280], "speed": 10}], "spawn": {"50": "start", "48": "new_coin", "49": "new_gem", "51": "new_checkpoint", "53": "new_slime", "54": "new_bat", "55": "new_turret", "56": "new_spiky", "52": "new_goal", "57": "new_spring"}, "play": "score, coins, gems, lives = 0, 0, 0, 3 load_level({n}) set_state(\"play\")", "keys": "the arrow keys and Z", "gameNote": "", "firstScreen": false, "snd": {"0": "JUMP", "1": "COIN", "2": "STOMP", "3": "HURT", "4": "POWER_UP", "5": "BUMP", "6": "SPRING", "7": "SHOOT", "10": "CHECKPOINT", "11": "ONE_UP", "12": "GEM", "13": "MENU", "14": "DIE"}}, "lesson20": {"names": {"256": ["ANIM_IDLE (frame 1 of 2)"], "257": ["ANIM_IDLE (frame 2 of 2)"], "258": ["ANIM_RUN (frame 1 of 4)"], "259": ["ANIM_RUN (frame 2 of 4)"], "260": ["ANIM_RUN (frame 3 of 4)"], "261": ["ANIM_RUN (frame 4 of 4)"], "262": ["SPR_JUMP"], "263": ["SPR_FALL"], "265": ["SPR_SQUASH"], "264": ["SPR_HURT"], "288": ["ANIM_COIN (frame 1 of 4)"], "289": ["ANIM_COIN (frame 2 of 4)"], "290": ["ANIM_COIN (frame 3 of 4)"], "291": ["ANIM_COIN (frame 4 of 4)"], "292": ["SPR_GEM"], "354": ["SPR_HUD_COIN"], "355": ["SPR_HUD_GEM"], "352": ["SPR_HEART"], "353": ["SPR_HEART_EMPTY"], "359": ["SPR_HUD_PIP"], "297": ["SPR_CHECK_DOWN"], "298": ["SPR_CHECK_UP"], "272": ["ANIM_SLIME (frame 1 of 2)"], "273": ["ANIM_SLIME (frame 2 of 2)"], "274": ["SPR_SLIME_FLAT"], "275": ["ANIM_BAT (frame 1 of 2)"], "276": ["ANIM_BAT (frame 2 of 2)"], "277": ["SPR_TURRET"], "278": ["SPR_BULLET"], "279": ["ANIM_SPIKY (frame 1 of 2)"], "280": ["ANIM_SPIKY (frame 2 of 2)"], "356": ["SPR_HUD_FEATHER"], "357": ["SPR_HUD_BOOTS"], "358": ["SPR_HUD_STAR"], "301": ["SPR_SPRING_DOWN"], "302": ["SPR_SPRING_UP"], "303": ["SPR_PLATFORM"], "299": ["SPR_GOAL"], "14": ["T_LAVA_A"], "15": ["T_LAVA_B"], "320": ["SPR_BOSS"], "322": ["SPR_BOSS_SQUISH"], "324": ["SPR_BOSS_HURT"], "50": ["M_START"], "48": ["M_COIN"], "49": ["M_GEM"], "51": ["M_CHECKPOINT"], "53": ["M_SLIME"], "54": ["M_BAT"], "55": ["M_TURRET"], "56": ["M_SPIKY"], "52": ["M_GOAL"], "57": ["M_SPRING"], "58": ["M_PLATFORM_H"], "59": ["M_PLATFORM_V"], "60": ["M_BOSS"], "21": ["T_USED_BLOCK"]}, "anims": [{"name": "ANIM_IDLE", "frames": [256, 257], "speed": 30}, {"name": "ANIM_RUN", "frames": [258, 259, 260, 261], "speed": 6}, {"name": "ANIM_COIN", "frames": [288, 289, 290, 291], "speed": 8}, {"name": "ANIM_SLIME", "frames": [272, 273], "speed": 12}, {"name": "ANIM_BAT", "frames": [275, 276], "speed": 6}, {"name": "ANIM_SPIKY", "frames": [279, 280], "speed": 10}], "spawn": {"50": "start", "48": "new_coin", "49": "new_gem", "51": "new_checkpoint", "53": "new_slime", "54": "new_bat", "55": "new_turret", "56": "new_spiky", "52": "new_goal", "57": "new_spring", "60": "new_boss"}, "play": "score, coins, gems, lives = 0, 0, 0, 3 load_level({n}) set_state(\"play\")", "keys": "the arrow keys and Z", "gameNote": "", "firstScreen": false, "snd": {"0": "JUMP", "1": "COIN", "2": "STOMP", "3": "HURT", "4": "POWER_UP", "5": "BUMP", "6": "SPRING", "7": "SHOOT", "8": "BOSS_HIT", "9": "EXPLODE", "10": "CHECKPOINT", "11": "ONE_UP", "12": "GEM", "13": "MENU", "14": "DIE"}}}}</script>
+<script>
+// The labs: TIC-80's own editors (our web build of 1.3.1 with the lab's functions:
+// tic80/build.sh lab, tic80/LAB.md) and, around them, panels that name what the
+// cart holds, show what is happening and what changed, and put things back.
+//   lab.html?cart=lesson15&mode=sfx|music|sprite|palette|map[&sprite=N]
+// This file is the shared part. lab-sound.js, lab-sprite.js and lab-map.js each
+// add editors with LAB.editor({...}), and LAB.start() runs last.
+var LAB = (function () {
+  'use strict';
+
+  var DATA = JSON.parse(document.getElementById('lab-data').textContent);
+  var HERO = DATA.hero || 'the player';      // the game's hero, by name (the project's course.HERO)
+  var params = new URLSearchParams(location.search);
+  // the cart: lab/<name>.png (Pip's Peak: lesson16; another course: an add-on lesson's id)
+  var CART = /^[a-z0-9][a-z0-9-]{0,40}$/.test(params.get('cart') || '') ? params.get('cart') : 'lesson16';
+  // the editors each lab has, the first one open at the start
+  var FAMILIES = { sfx: [0, 1], music: [1, 0], sprite: [2], palette: [2], map: [3, 2] };
+  var TITLES = { sfx: 'Sound Lab', music: 'Sound Lab', sprite: 'Sprite Lab', palette: 'Sprite Lab', map: 'Map Lab' };
+  var MODE = FAMILIES[params.get('mode')] ? params.get('mode') : 'sfx';
+  var FAMILY = FAMILIES[MODE];
+  var CODE = (DATA.code || {})[CART] || {};   // what this lesson's code calls things
+  // a cart with names of its own (a library cart): its sounds, songs and patterns
+  var OWN = (DATA.cartNames || {})[CART];
+  if (OWN) ['sfx', 'tracks', 'patterns'].forEach(function (k) { if (OWN[k]) DATA[k] = OWN[k]; });
+  var IN_PAGE = window.parent !== window;
+  var TOUCH = Boolean(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  var GAME = 4, WORLD = 5;                   // lab_editor(): the cart running, the world view
+  if (IN_PAGE) document.documentElement.classList.add('in-page');
+
+  function $(id) { return document.getElementById(id); }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function button(cls, text, onClick) {
+    var b = el('button', cls, text);
+    b.type = 'button';
+    if (onClick) b.addEventListener('click', onClick);
+    return b;
+  }
+  function s8(v) { return v << 24 >> 24; }
+  function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's'); }
+  function seconds(s) { return (Math.round(s * 100) / 100) + ' s'; }
+  function ranges(list) {
+    var out = [], i = 0;
+    while (i < list.length) {
+      var j = i;
+      while (j + 1 < list.length && list[j + 1] === list[j] + 1) j++;
+      out.push(j > i ? list[i] + '–' + list[j] : String(list[i]));
+      i = j + 1;
+    }
+    return out.join(', ');
+  }
+  function byMouse(e) { return Boolean(e && e.detail > 0); }
+
+  // ---------------------------------------------------------------------------
+  // TIC-80
+  // ---------------------------------------------------------------------------
+  var canvas = $('canvas');
+  var M = null;                       // the module, once the studio is up
+  var original = {};                  // the cart as loaded (PNG bytes); editors keep their own parts
+  var cartBytes = fetch(CART + '.png').then(function (r) {
+    if (!r.ok) throw new Error(r.status);
+    return r.arrayBuffer();
+  }).then(function (b) { return new Uint8Array(b); });
+
+  window.Module = {
+    canvas: canvas,
+    arguments: ['--skip'],
+    onRuntimeInitialized: function () {
+      var start = window.Module._sokol_start;
+      window.Module._sokol_start = function () {
+        // The studio reads its options when it starts: no CRT effect, and the
+        // picture fills the 16:9 box (the labels rely on that).
+        try {
+          var dir = '/com.nesbox.tic/TIC-80/.local/62c24e5/', path = dir + 'options.json', opts = {};
+          FS.mkdirTree(dir);
+          try { opts = JSON.parse(FS.readFile(path, { encoding: 'utf8' })); } catch (e) { /* first run */ }
+          opts.crt = false;
+          opts.integerScale = false;
+          FS.writeFile(path, JSON.stringify(opts));
+        } catch (e) { /* the defaults, then */ }
+        return start.apply(this, arguments);
+      };
+    }
+  };
+
+  function heap() { return M.HEAPU8; }
+  // the bytes behind one of the lab's pointer functions (lab_sfx_data, ...)
+  function bytes(fn, size) { var p = M['_' + fn](); return heap().subarray(p, p + size); }
+  function ram(addr) { return heap()[M._lab_ram() + addr]; }
+  function withBytes(data, fn) {
+    var p = M._malloc(data.length);
+    heap().set(data, p);
+    try { return fn(p, data.length); } finally { M._free(p); }
+  }
+  function loadCart(data) { withBytes(data, function (p, n) { M._lab_load(p, n); }); }
+  function cString(text) { return new TextEncoder().encode(text + '\0'); }
+
+  function resumeAudio() {
+    var ctx = window.Module && window.Module._saudio_context;
+    if (ctx && ctx.state !== 'running') ctx.resume().catch(function () {});
+  }
+  document.addEventListener('pointerdown', resumeAudio, true);
+  document.addEventListener('keydown', resumeAudio, true);
+
+  // While TIC-80 has the keyboard: Space and the arrows don't scroll the page, and Tab
+  // (Shift+Tab where the editor uses Tab) still moves on to the page's buttons. These
+  // run before TIC-80's own handlers: they are added before tic80.js loads.
+  function tabOut(e) {
+    var m = editors[state.editor];
+    return e.key === 'Tab' && state.screen !== GAME && (e.shiftKey || !(m && m.usesTab));
+  }
+  window.addEventListener('keydown', function (e) {
+    if (document.activeElement !== canvas) return;
+    if (tabOut(e)) { e.stopImmediatePropagation(); return; }
+    if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown'].indexOf(e.key) >= 0) e.preventDefault();
+  }, true);
+  window.addEventListener('keyup', function (e) {
+    if (document.activeElement === canvas && tabOut(e)) e.stopImmediatePropagation();
+  }, true);
+  // the wheel scrolls the page, except over an editor that scrolls with it
+  window.addEventListener('wheel', function (e) {
+    var m = editors[state.editor];
+    if (!(m && m.usesWheel) || state.screen === GAME) e.stopImmediatePropagation();
+  }, { capture: true, passive: true });
+
+  // ---------------------------------------------------------------------------
+  // Pictures: tiles and sprites as the cart holds them (4 bits a pixel, 32 bytes a tile)
+  // ---------------------------------------------------------------------------
+  function pixel(tiles, id, x, y) {
+    var b = tiles[id * 32 + y * 4 + (x >> 1)];
+    return x & 1 ? b >> 4 : b & 15;
+  }
+  function color(palette, c) { return [palette[c * 3], palette[c * 3 + 1], palette[c * 3 + 2]]; }
+  function hex(palette, c) {
+    return '#' + color(palette, c).map(function (v) { return (v < 16 ? '0' : '') + v.toString(16); }).join('');
+  }
+  // a w x h block of tiles starting at id (as spr() reads them), into a canvas; color `key` is see-through
+  function paint(cv, tiles, palette, id, w, h, scale, key) {
+    w = w || 1; h = h || 1; scale = scale || 1;
+    cv.width = 8 * w * scale;
+    cv.height = 8 * h * scale;
+    var ctx = cv.getContext('2d'), img = ctx.createImageData(cv.width, cv.height), d = img.data;
+    for (var ty = 0; ty < h; ty++) {
+      for (var tx = 0; tx < w; tx++) {
+        var t = id + ty * 16 + tx;
+        for (var y = 0; y < 8; y++) {
+          for (var x = 0; x < 8; x++) {
+            var c = pixel(tiles, t, x, y);
+            if (c === key) continue;
+            var rgb = color(palette, c);
+            for (var sy = 0; sy < scale; sy++) {
+              for (var sx = 0; sx < scale; sx++) {
+                var o = (((ty * 8 + y) * scale + sy) * cv.width + (tx * 8 + x) * scale + sx) * 4;
+                d[o] = rgb[0]; d[o + 1] = rgb[1]; d[o + 2] = rgb[2]; d[o + 3] = 255;
+              }
+            }
+          }
+        }
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    return cv;
+  }
+  // what the course's game makes of a sprite flag in this lesson: [name, meaning, lesson],
+  // or null before the lesson just ahead of the one that starts using it
+  // (a course whose lab_code lists the flags the cart's code reads, CODE.flags, uses those)
+  function flagMeaning(bit, lesson) {
+    var f = DATA.flags[bit];
+    if (f && CODE.flags) return CODE.flags.indexOf(bit) >= 0 ? f : null;
+    if (!f || lesson < f[2] - 1) return null;
+    // a flag set in this lesson for the next one: this lesson's game doesn't look at it yet
+    return lesson < f[2] ? [f[0], 'nothing yet in this lesson\'s game; from lesson ' + f[2] + ', ' + f[1], f[2]] : f;
+  }
+  // A marker tile, in words: the level loader (CODE.spawn: tile -> "new_coin", "start",
+  // "new_platform:left and right") replaces it when a level starts. level: the level the
+  // cell is in, for what goes in its place (its back wall, or nothing).
+  function marker(id, level) {
+    var what = (CODE.spawn || {})[id];
+    if (!what) return null;
+    var how = what.split(':'), fn = how[0];
+    var words = fn === 'start' ? 'where ' + HERO + ' starts' : (DATA.markers || {})[fn] || fn.replace(/^new_/, 'a ').replace(/_/g, ' ');
+    if (how[1]) words += ', moving ' + how[1];
+    var bg = level ? level.bg : null;
+    var after = bg === null ? 'the level\'s background' : bg ? 'tile ' + bg + ' (' + (DATA.art[bg] || 'the back wall') + ')' : 'nothing';
+    return '<b>A marker: ' + words + '.</b> When the level starts, <code>load_level()</code> ' +
+      (fn === 'start' ? 'puts ' + HERO + ' here' : 'calls <code>' + fn + '</code>, which puts the real thing here') +
+      ', and the cell gets ' + after + ' instead: the marker tile itself is never drawn in the game.';
+  }
+  function tileEmpty(tiles, id) {
+    for (var k = 0; k < 32; k++) if (tiles[id * 32 + k]) return false;
+    return true;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Editors
+  // ---------------------------------------------------------------------------
+  var editors = {};      // id -> what lab-sound.js, lab-sprite.js, lab-map.js register
+  var state = { screen: -2, editor: -1, last: FAMILY[0], pointed: null };
+
+  function editor(module) {
+    module.view = {};
+    editors[module.id] = module;
+  }
+  function inLab(id) { return FAMILY.indexOf(id) >= 0 && editors[id] && editors[id].available; }
+  // the lab's editor for what TIC-80 shows: the world view belongs to the map
+  function labEditor(screen) {
+    var id = screen === WORLD ? 3 : screen;
+    return inLab(id) ? id : -1;
+  }
+
+  // A click with the mouse leaves the keyboard with TIC-80; a key press on a button
+  // leaves it on the button.
+  function open(id, focus) {
+    M._lab_sfx_play(0);   // let go of a Space the lab holds, or the next editor would get it
+    M._lab_open(id);
+    if (editors[id].opened) editors[id].opened();
+    if (focus) canvas.focus({ preventScroll: true });
+  }
+  function ensure(id) { if (labEditor(M._lab_editor()) !== id || M._lab_editor() === WORLD) open(id, false); }
+
+  // ---------------------------------------------------------------------------
+  // What each part of the editor is: the pointing line, the outlines, the list
+  // ---------------------------------------------------------------------------
+  var highlights = [];
+  function highlight(rects) {
+    highlights.forEach(function (h) { h.remove(); });
+    highlights = (rects || []).map(function (r) {
+      var h = el('div', 'hl');
+      h.style.left = ((8 + r[0]) / 256 * 100) + '%';
+      h.style.top = ((4 + r[1]) / 144 * 100) + '%';
+      h.style.width = (r[2] / 256 * 100) + '%';
+      h.style.height = (r[3] / 144 * 100) + '%';
+      $('screen').appendChild(h);
+      return h;
+    });
+  }
+  function parts() {
+    var m = editors[state.editor];
+    return m ? (typeof m.parts === 'function' ? m.parts(state.screen) : m.parts) : [];
+  }
+  function point(part) {
+    var p = $('pointing'), m = editors[state.editor];
+    if (!part) { p.innerHTML = m ? m.hint(TOUCH, state.screen) : ''; return; }
+    p.innerHTML = '';
+    p.appendChild(el('b', null, part.name));
+    p.appendChild(document.createTextNode(': ' + part.text));
+  }
+  function partAt(sx, sy) {
+    var m = editors[state.editor];
+    if (m && m.partAt) {
+      var special = m.partAt(sx, sy, state.screen);
+      if (special) return special;
+    }
+    var list = parts();
+    for (var i = 0; i < list.length; i++) {
+      for (var k = 0; k < list[i].rects.length; k++) {
+        var r = list[i].rects[k];
+        if (sx >= r[0] && sx < r[0] + r[2] && sy >= r[1] && sy < r[1] + r[3]) return list[i];
+      }
+    }
+    return null;
+  }
+  canvas.addEventListener('mousemove', function (e) {
+    if (!M || state.editor < 0) return;
+    var box = canvas.getBoundingClientRect();
+    var sx = (e.clientX - box.left) / box.width * 256 - 8, sy = (e.clientY - box.top) / box.height * 144 - 4;
+    var m = editors[state.editor];
+    if (m.pointer) m.pointer(sx, sy, state.screen);
+    var part = partAt(sx, sy);
+    if (part !== state.pointed) { state.pointed = part; point(part); }
+  });
+  canvas.addEventListener('mouseleave', function () {
+    var m = editors[state.editor];
+    if (m && m.pointer) m.pointer(null, null, state.screen);
+    state.pointed = null;
+    point(null);
+  });
+
+  function buildLegend() {
+    var ul = $('legend');
+    ul.innerHTML = '';
+    parts().forEach(function (part) {
+      var li = el('li'), b = button(null);
+      b.appendChild(el('b', null, part.name));
+      b.appendChild(document.createTextNode(': ' + part.text));
+      function on() { b.classList.add('active'); highlight(part.rects); point(part); }
+      function off() { b.classList.remove('active'); highlight(null); point(state.pointed); }
+      b.addEventListener('mouseenter', on);
+      b.addEventListener('mouseleave', off);
+      b.addEventListener('focus', on);
+      b.addEventListener('blur', off);
+      li.appendChild(b);
+      ul.appendChild(li);
+    });
+  }
+  // without a mouse to point with, the list of parts is the way to learn them
+  if (TOUCH) $('legend-box').open = true;
+
+  // ---------------------------------------------------------------------------
+  // What TIC-80 shows: one of the lab's editors, the game, or somewhere else
+  // ---------------------------------------------------------------------------
+  function screenChanged(screen) {
+    var id = labEditor(screen), away = id < 0;
+    state.screen = screen;
+    $('away').hidden = !away;
+    $('away-text').textContent = screen === GAME
+      ? 'The game is running, with your changes. ' + (TOUCH ? 'Tap the game to show its buttons. ' : 'Play it with ' + (CODE.keys || 'the arrow keys') + '. ') +
+        (CODE.gameNote ? CODE.gameNote + ' ' : '') + 'Press Esc (or Back) to come back to the editor.'
+      : 'You left the lab\'s editors (that\'s fine: this is the whole TIC-80).';
+    document.querySelector('.lab').classList.toggle('running', screen === GAME);
+    $('back').textContent = screen === GAME ? 'Back to the editor' : 'Back to the ' + TITLES[MODE];
+    $('pointing').hidden = away;
+    document.querySelectorAll('.tab').forEach(function (t) {
+      t.setAttribute('aria-selected', String(Number(t.getAttribute('data-editor')) === id));
+    });
+    if (away) {
+      M._lab_sfx_play(0);
+      highlight(null);
+      return;
+    }
+    state.editor = id;
+    state.last = id;
+    document.querySelectorAll('.panels[data-for]').forEach(function (p) {
+      p.hidden = Number(p.getAttribute('data-for')) !== id;
+    });
+    $('save').textContent = editors[id].save.label;
+    state.pointed = null;
+    highlight(null);
+    point(null);
+    buildLegend();
+    editors[id].view = {};
+  }
+
+  $('back').addEventListener('click', function (e) { open(state.last, byMouse(e)); });
+
+  // The game, from the start, or with some Lua run in it once it has started (a
+  // level to begin at). The keyboard goes to TIC-80: that's how you play.
+  var runs = 0;
+  function run(lua) {
+    var token = ++runs;
+    M._lab_sfx_play(0);
+    M._lab_run();
+    canvas.focus({ preventScroll: true });
+    $('screen').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (!lua) return;
+    var code = cString(lua), tries = 0;
+    (function later() {
+      // the cart's Lua starts on its first tick; until then there is nothing to run code in
+      if (token !== runs || M._lab_editor() !== GAME || tries++ > 120) return;
+      var ok = tries > 5 && withBytes(code, function (p) { return M._lab_eval(p); });
+      if (!ok) requestAnimationFrame(later);
+    })();
+  }
+  $('try').addEventListener('click', function () { run(null); });
+
+  // ---------------------------------------------------------------------------
+  // The loop, reset and save
+  // ---------------------------------------------------------------------------
+  var lastSlow = 0;
+  function refresh() { lastSlow = 0; }
+
+  function frame(now) {
+    try {
+      var screen = M._lab_editor();
+      if (screen !== state.screen) screenChanged(screen);
+      var slow = now - lastSlow > 250;
+      if (slow) lastSlow = now;
+      var m = editors[labEditor(screen)];
+      if (m) m.update(slow, screen);
+    } finally {
+      requestAnimationFrame(frame);
+    }
+  }
+
+  var resetArmed = null;
+  $('reset-all').addEventListener('click', function () {
+    var btn = this;
+    // one click arms it, a second one within a few seconds resets: a slip of the mouse loses nothing
+    if (!resetArmed) {
+      btn.textContent = 'Click again to reset everything';
+      btn.classList.add('armed');
+      resetArmed = setTimeout(function () { resetArmed = null; btn.textContent = 'Reset everything'; btn.classList.remove('armed'); }, 5000);
+      return;
+    }
+    clearTimeout(resetArmed);
+    resetArmed = null;
+    btn.textContent = 'Reset everything';
+    btn.classList.remove('armed');
+    // loading the cart again starts the editors over: keep what they showed
+    var kept = FAMILY.filter(inLab).map(function (id) { return [id, editors[id].keep ? editors[id].keep() : null]; });
+    M._lab_music_stop();
+    loadCart(original.cart);
+    kept.forEach(function (k) { if (editors[k[0]].restore) editors[k[0]].restore(k[1]); });
+    open(state.last, false);
+    Object.keys(editors).forEach(function (id) { editors[id].view = {}; });
+    refresh();
+  });
+
+  function download(data, name) {
+    var a = el('a');
+    a.href = URL.createObjectURL(new Blob([data], { type: 'image/png' }));
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 10000);
+  }
+
+  // What the saved cart is, and the console commands that copy parts of it into
+  // your own game (`load <file> <part>`: only that part changes, but all of it).
+  function saveHelp(save, note) {
+    $('save-help').hidden = false;
+    $('save-help').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (note) { $('save-text').innerHTML = '<p>' + note + '</p>'; return; }
+    var name = save.file;
+    $('save-text').innerHTML =
+      '<p><b>' + name + '</b> is a whole TIC-80 cart: this lesson\'s game with your changes. To put ' + save.what +
+      ' into your own game:</p><ol>' +
+      '<li>Copy <b>' + name + '</b> into TIC-80\'s folder (type <code>folder</code> in TIC-80\'s console to open it).</li>' +
+      '<li>Load your game, then type ' + save.parts.map(function (p) {
+        return '<code>load ' + name + ' ' + p[0] + '</code> for ' + p[1];
+      }).join(', or ') + '. Only that part changes, so your code stays as it is. But all of that part changes: ' +
+      'anything you made yourself in it is replaced by this cart\'s.</li>' +
+      '<li>Type <code>save</code> (or press <kbd>Ctrl</kbd>+<kbd>S</kbd>) to save your game.</li></ol>';
+  }
+
+  // In the course page, the page offers the file (in the claude.ai viewer, through its
+  // downloads) and says how it went; a page that doesn't answer isn't the course.
+  var pendingSave = null;
+  window.addEventListener('message', function (e) {
+    var msg = e.data;
+    if (e.source !== window.parent || !pendingSave || !msg || msg.type !== 'lab-saved') return;
+    var job = pendingSave;
+    pendingSave = null;
+    clearTimeout(job.timer);
+    if (msg.ok) saveHelp(job.save);
+    else if (msg.reason === 'declined') saveHelp(job.save, 'Not saved: the download was cancelled. Click Save again whenever you like.');
+    else { download(job.data, job.save.file); saveHelp(job.save); }
+  });
+
+  $('save').addEventListener('click', function () {
+    var size = withBytes(original.cart, function (p, n) { return M._lab_save_png(p, n); });
+    var data = heap().slice(M._lab_saved(), M._lab_saved() + size);
+    var save = editors[state.last].save;
+    if (!IN_PAGE) { download(data, save.file); saveHelp(save); return; }
+    if (pendingSave) clearTimeout(pendingSave.timer);
+    pendingSave = { data: data, save: save, timer: setTimeout(function () {
+      pendingSave = null;
+      download(data, save.file);
+      saveHelp(save);
+    }, 60000) };
+    window.parent.postMessage({ type: 'lab-save', filename: save.file, bytes: data }, '*');
+  });
+  $('save-close').addEventListener('click', function () { $('save-help').hidden = true; });
+
+  // The course page sizes the frame to fit the lab.
+  if (IN_PAGE && window.ResizeObserver) {
+    var lab = document.querySelector('.lab'), sent = 0;
+    new ResizeObserver(function () {
+      var h = Math.ceil(lab.getBoundingClientRect().height);
+      if (h !== sent) { sent = h; window.parent.postMessage({ type: 'lab-height', height: h }, '*'); }
+    }).observe(lab);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Start: TIC-80, then the cart, then the editors
+  // ---------------------------------------------------------------------------
+  function begin(data) {
+    M = window.Module;
+    original.cart = data;
+    loadCart(data);
+    FAMILY.forEach(function (id) { if (editors[id]) editors[id].init(); });   // each sets .available
+    var tabs = $('tabs'), first = -1;
+    FAMILY.forEach(function (id) {
+      if (!inLab(id)) return;
+      if (first < 0) first = id;
+      var t = button('tab', editors[id].tab, function (e) { open(id, byMouse(e)); });
+      t.setAttribute('role', 'tab');
+      t.setAttribute('data-editor', String(id));
+      tabs.appendChild(t);
+      var panels = el('div', 'panels');
+      panels.setAttribute('data-for', String(id));
+      panels.hidden = true;
+      $('editor-panels').appendChild(panels);
+      editors[id].build(panels);
+    });
+    if (first < 0) { $('loading').textContent = 'This cart has nothing for this lab yet.'; return; }
+    state.last = first;
+    FAMILY.forEach(function (id) { if (inLab(id) && editors[id].start) editors[id].start(params); });
+    open(first, false);
+    $('loading').hidden = true;
+    $('reset-all').disabled = $('save').disabled = $('try').disabled = false;
+    requestAnimationFrame(frame);
+  }
+
+  function start() {
+    $('title').textContent = TITLES[MODE];
+    $('touch-note').hidden = !TOUCH;
+    document.title = TITLES[MODE];
+    (function wait() {
+      if (window.Module._lab_ready && window.Module._lab_ready()) { cartBytes.then(begin, function () {}); return; }
+      setTimeout(wait, 50);
+    })();
+    cartBytes.catch(function () { $('loading').textContent = 'The cart did not load. Try opening the lab again.'; });
+    var script = el('script');
+    script.src = 'tic80.js';
+    script.onerror = function () { $('loading').textContent = 'TIC-80 did not load. Try opening the lab again.'; };
+    document.body.appendChild(script);
+  }
+
+  return {
+    DATA: DATA, CART: CART, MODE: MODE, CODE: CODE, TOUCH: TOUCH, GAME: GAME, WORLD: WORLD,
+    $: $, el: el, button: button, s8: s8, plural: plural, seconds: seconds, ranges: ranges, byMouse: byMouse,
+    canvas: canvas, M: function () { return M; }, heap: heap, bytes: bytes, ram: ram,
+    pixel: pixel, color: color, hex: hex, paint: paint, tileEmpty: tileEmpty, flagMeaning: flagMeaning, marker: marker,
+    state: state, editor: editor, open: open, ensure: ensure, run: run, refresh: refresh, highlight: highlight,
+    relegend: function () { buildLegend(); point(state.pointed); },
+    start: start
+  };
+})();
+// The Sound Lab's editors (lab-core.js): sound effects (0) and music (1). Lessons 15 and 16.
+(function (L) {
+  'use strict';
+  var $ = L.$, el = L.el, s8 = L.s8, plural = L.plural, seconds = L.seconds, ranges = L.ranges, byMouse = L.byMouse;
+  var DATA = L.DATA, ram = L.ram;
+  var M = null;
+  var orig = {};
+
+  // Memory (tic.h): RAM addresses, and the layout of what the editors edit.
+  var SFX_POS = 0x0FF8C, REGISTERS = 0x0FF9C, MUSIC_STATE = 0x13FFC;
+  var WAVES = 256, SAMPLE = 66, SAMPLES = 64;
+  var PATTERN = 192, PATTERNS = 60, TRACK = 51, TRACKS = 8, FRAMES = 16;
+  var NOTES = ['C-', 'C#', 'D-', 'D#', 'E-', 'F-', 'F#', 'G-', 'G#', 'A-', 'A#', 'B-'];
+  var ENVELOPES = [['vol', 'VOL (loudness)'], ['wave', 'WAV (waveform)'], ['chord', 'ARPEGG'], ['pitch', 'PITCH']];
+  var LOOP_NAMES = ['WAV', 'VOL', 'ARPEGG', 'PITCH'];
+
+
+  function sfxData() { return L.bytes('lab_sfx_data', WAVES + SAMPLE * SAMPLES); }
+  function musicData() { return L.bytes('lab_music_data', PATTERN * PATTERNS + TRACK * TRACKS); }
+
+  // ---------------------------------------------------------------------------
+  // Reading the cart: one SFX, one pattern row, one track
+  // ---------------------------------------------------------------------------
+  function sample(bytes, i) {
+    var o = WAVES + SAMPLE * i, ticks = [];
+    for (var t = 0; t < 30; t++) {
+      var a = bytes[o + 2 * t], b = bytes[o + 2 * t + 1];
+      ticks.push({ vol: 15 - (a & 15), wave: a >> 4, chord: b & 15, pitch: s8(b) >> 4 });
+    }
+    var c = bytes[o + 60], d = bytes[o + 61], speed = (c >> 4) & 7;
+    var loops = [];
+    for (var k = 0; k < 4; k++) loops.push({ start: bytes[o + 62 + k] & 15, size: bytes[o + 62 + k] >> 4 });
+    return {
+      ticks: ticks, octave: c & 7, x16: (c >> 3) & 1, speed: speed > 3 ? speed - 8 : speed, down: c >> 7,
+      note: d & 15, left: (d >> 4) & 1, right: (d >> 5) & 1, shift: d >> 6, loops: loops
+    };
+  }
+  function sampleBytes(bytes, i) {
+    // byte 61's top two bits are the editor's keyboard octave shift, not the sound
+    var o = WAVES + SAMPLE * i, out = Array.prototype.slice.call(bytes.subarray(o, o + SAMPLE));
+    out[61] &= 0x3f;
+    return out;
+  }
+  function sampleChanged(i) {
+    var a = sampleBytes(orig.sfx, i), b = sampleBytes(sfxData(), i);
+    for (var k = 0; k < SAMPLE; k++) if (a[k] !== b[k]) return true;
+    return false;
+  }
+  function hasSound(bytes, i) {
+    var o = WAVES + SAMPLE * i;
+    for (var k = 0; k < SAMPLE; k++) if (bytes[o + k]) return true;
+    return false;
+  }
+  function noteName(note, octave) { return NOTES[note] + (octave + 1); }
+  // how many ticks the 30 steps take at a speed (the core's tic_tool_sfx_pos)
+  function sfxTicks(speed) { return speed > 0 ? Math.ceil(29 / (1 + speed)) + 1 : 29 * (1 - speed) + 1; }
+  // how long the 30 ticks last, in seconds: SPD 0 is one tick a frame
+  function sfxSeconds(speed) { return (speed > 0 ? 30 / (1 + speed) : 30 * (1 - speed)) / 60; }
+  // the ticks a speed plays: above 0 it jumps ahead (SPD 1 plays every 2nd tick), and stops on the last
+  function played(speed, t) { return speed <= 0 || t % (1 + speed) === 0 || t === 29; }
+  function speedText(speed) {
+    if (speed > 0) return 'plays every ' + (speed === 1 ? '2nd' : speed === 2 ? '3rd' : (speed + 1) + 'th') + ' tick, skipping the others';
+    if (speed < 0) return 'each tick lasts ' + (1 - speed) + ' frames';
+    return 'each tick lasts one frame';
+  }
+
+  function row(bytes, pattern, r) {
+    var o = (pattern - 1) * PATTERN + r * 3, a = bytes[o], b = bytes[o + 1], c = bytes[o + 2];
+    return { note: a & 15, sfx: ((b >> 7) << 5) | (c & 31), octave: c >> 5, command: (b >> 4) & 7 };
+  }
+  function track(bytes, t) {
+    var o = PATTERNS * PATTERN + t * TRACK, frames = [];
+    for (var f = 0; f < FRAMES; f++) {
+      var v = bytes[o + 3 * f] | (bytes[o + 3 * f + 1] << 8) | (bytes[o + 3 * f + 2] << 16), ids = [];
+      for (var c = 0; c < 4; c++) ids.push((v >> (6 * c)) & 63);
+      frames.push(ids);
+    }
+    var length = 0;
+    while (length < FRAMES && frames[length].some(function (id) { return id; })) length++;
+    return { frames: frames, length: length, tempo: s8(bytes[o + 48]) + 150, rows: 64 - bytes[o + 49], speed: s8(bytes[o + 50]) + 6 };
+  }
+  // the note a channel's pattern last started at or before row r
+  function lastNote(bytes, pattern, r) {
+    for (; r >= 0; r--) {
+      var x = row(bytes, pattern, r);
+      if (x.note === 1) return { off: true };
+      if (x.note >= 4) return { name: noteName(x.note - 4, x.octave), sfx: x.sfx };
+    }
+    return null;
+  }
+  function rowText(bytes, pattern, r) {
+    var x = row(bytes, pattern, r);
+    if (x.note === 0) return 'nothing';
+    if (x.note === 1) return 'note off';
+    if (x.note < 4) return 'note ' + x.note;
+    return noteName(x.note - 4, x.octave) + ' ' + (DATA.sfx[x.sfx] ? DATA.sfx[x.sfx] + ' (' + x.sfx + ')' : 'SFX ' + x.sfx);
+  }
+  function firstInstrument(bytes, pattern) {
+    for (var r = 0; r < 64; r++) {
+      var x = row(bytes, pattern, r);
+      if (x.note >= 4) return x.sfx;
+    }
+    return -1;
+  }
+  function sfxName(i) { return DATA.sfx[i] ? DATA.sfx[i] + ' (SFX ' + i + ')' : 'SFX ' + i; }
+  function patternName(id) { return DATA.patterns[id] || 'pattern ' + id; }
+  function trackName(t) { return DATA.tracks[t] || 'track ' + t; }
+
+  function graph(y, id, name, text) {
+    return { id: id, rects: [[115, y, 120, 33]], name: name, text: text };
+  }
+  var SFX_PARTS = [
+      { id: 'idx', rects: [[9, 12, 39, 8]], name: 'IDX', text: 'the number of the sound you are editing, 0 to 63. Click a square below, or press the ← and → keys, to pick another.' },
+      { id: 'spd', rects: [[48, 12, 31, 8]], name: 'SPD', text: 'speed: how fast the sound goes through its 30 ticks. At 0 each tick lasts one frame. More green bars skip ticks (1 plays every 2nd tick), so the sound is shorter; fewer make each tick last longer.' },
+      { id: 'grid', rects: [[9, 20, 70, 17]], name: 'The 64 sounds', text: 'one square for each sound. Green is the one you are editing; the light squares have a sound in them. Click one to edit it.' },
+      { id: 'wave', rects: [[7, 41, 74, 40]], name: 'Waveform', text: 'the shape of the sound wave, which gives the sound its color: buzzy, soft or noisy. Draw on it to change the shape.' },
+      { id: 'slots', rects: [[7, 81, 74, 43]], name: 'Waveform slots', text: 'the 16 waveforms of the cart. Clicking one makes every tick of this sound use it. The icons on the right cut, copy, paste, undo and redo the waveform.' },
+      { id: 'tabs', rects: [[88, 12, 27, 18]], name: 'VOL / WAV and LR', text: 'choose what the top graph shows: VOL (loudness) or WAV (which waveform). L and R switch the left and right speaker on or off.' },
+      graph(12, 'vol', 'VOL / WAV (top graph)', 'one column for each of the 30 ticks, left to right. On VOL a taller column is a louder tick; on WAV it is the waveform slot that tick uses. Point at a column and the editor\'s top bar shows [x=tick y=value].'),
+      { id: 'arp', rects: [[115, 51, 120, 33], [88, 51, 27, 18]], name: 'ARPEGG', text: 'how many notes to jump up on each tick. Quick jumps make trills and chords. Click DOWN to make the jumps go down.' },
+      { id: 'pitch', rects: [[115, 90, 120, 33], [88, 90, 27, 18]], name: 'PITCH', text: 'a tiny bend up or down on each tick (the middle line is no bend). Click x16 to make the bends 16 times bigger: slides and sirens.' },
+      { id: 'loop', rects: [[88, 30, 27, 15], [88, 69, 27, 15], [88, 108, 27, 15]], name: 'LOOP', text: 'under each graph: the tick the loop starts at and how many ticks it has (in hex: A is 10 … F is 15). While the sound plays, those ticks repeat.' },
+      { id: 'piano', rects: [[5, 126, 232, 10]], name: 'Piano', text: 'click a key to hear this sound at that note. It also becomes the sound\'s base note: the red dot.' },
+      { id: 'top', rects: [[0, 0, 240, 8]], name: 'Top bar', text: 'the editors: code, sprites, map, sound effects (this one) and music. On the right: cut, copy, paste, undo and redo.' }
+  ];
+  var MUSIC_PARTS = [
+      { id: 'track', rects: [[2, 9, 54, 9]], name: 'TRACK', text: 'which song you are looking at, 0 to 7. The game plays one with music(n).' },
+      { id: 'tempo', rects: [[56, 9, 60, 9]], name: 'TEMPO', text: 'how fast the song goes: higher is faster. Click to raise it by one, right-click to lower it, Shift+click for ten at a time, or drag sideways.' },
+      { id: 'spd', rects: [[116, 9, 42, 9]], name: 'SPD', text: 'the other speed knob: higher is slower. Twice the SPD plays half as fast.' },
+      { id: 'rows', rects: [[158, 9, 46, 9]], name: 'ROWS', text: 'how many rows a frame plays before the next frame starts (up to 64).' },
+      { id: 'scope', rects: [[204, 8, 36, 12]], name: 'Sound waves', text: 'the waves the four channels are playing right now.' },
+      { id: 'row', rects: [[4, 20, 21, 12]], name: 'Row', text: 'the row the cursor is on (0 to 63).' },
+      { id: 'frames', rects: [[4, 33, 21, 100]], name: 'Frames', text: 'the numbers on the left are frames, not rows: the parts of the song, played from the top until an empty frame. The bright number is the frame on screen (an arrow marks the one playing); click one to see its patterns.' },
+      { id: 'pats', rects: [[25, 20, 54, 12], [79, 20, 54, 12], [133, 20, 54, 12], [187, 20, 54, 12]], name: 'Pattern numbers', text: 'which pattern each channel plays in this frame (00: none). The switch next to it turns the channel on or off.' },
+      { id: 'chans', rects: [[25, 33, 54, 100], [79, 33, 54, 100], [133, 33, 54, 100], [187, 33, 54, 100]], name: 'Channels', text: 'four channels play at once, time going down a row at a time. E-6 16 means: the note E in octave 6, played by instrument (SFX) 16. Dashes: nothing new, the last note goes on. The white line is the row playing right now. The last three columns are an effect and its two values.' },
+      { id: 'top', rects: [[0, 0, 240, 8]], name: 'Top bar', text: 'the editors on the left. On the right: LOOP, FOLLOW, SUSTAIN, then play from the cursor, play the frame and play the track (STOP shows while it plays), and the PIANO and TRACKER views.' }
+  ];
+  var sfxChips = {};
+
+  function buildSfxList() {
+    var box = $('sfx-list');
+    box.innerHTML = '';
+    [['The game\'s sound effects', 0, 16], ['The instruments the music plays', 16, 64]].forEach(function (g) {
+      var ids = [];
+      for (var i = g[1]; i < g[2]; i++) if (hasSound(orig.sfx, i)) ids.push(i);
+      if (!ids.length) return;
+      box.appendChild(el('p', 'group-name', g[0]));
+      var chips = el('div', 'chips');
+      ids.forEach(function (i) {
+        var c = el('button', 'chip');
+        c.type = 'button';
+        c.setAttribute('aria-pressed', 'false');
+        c.appendChild(el('span', 'n', String(i)));
+        c.appendChild(document.createTextNode(DATA.sfx[i] || 'sound ' + i));
+        c.addEventListener('click', function (e) { playSfx(i, e); });
+        sfxChips[i] = c;
+        chips.appendChild(c);
+      });
+      box.appendChild(chips);
+    });
+    var bars = $('sfx-ticks');
+    for (var t = 0; t < 30; t++) bars.appendChild(el('i'));
+  }
+
+  function playSfx(i, e) {
+    L.ensure(0);
+    if (i != null) M._lab_sfx_select(i);
+    var s = sample(sfxData(), M._lab_sfx_index());
+    var loops = s.loops[1].size > 0;   // a looping volume never ends: play it for a second
+    M._lab_sfx_play(loops ? 60 : sfxTicks(s.speed) + 2);
+    if (byMouse(e)) L.canvas.focus({ preventScroll: true });
+  }
+
+  function sfxFacts(i, s) {
+    var facts = [], waves = [];
+    s.ticks.forEach(function (t) { if (waves.indexOf(t.wave) < 0) waves.push(t.wave); });
+    facts.push('Base note <b>' + noteName(s.note, s.octave) + '</b>' + (s.shift
+      ? '. The editor plays it ' + plural(s.shift, 'octave') + ' higher right now (you used the top row of keys); the red dot shows that, the game doesn\'t.'
+      : ': the red dot on the piano.'));
+    facts.push('<b>SPD ' + s.speed + '</b>: ' + speedText(s.speed) + ', so the 30 ticks take ' + seconds(sfxSeconds(s.speed)) + '.');
+    facts.push('Waveform' + (waves.length > 1 ? 's ' : ' ') + waves.map(function (w) {
+      return w + (DATA.waves[w] ? ' (' + DATA.waves[w] + ')' : '');
+    }).join(', ') + '.');
+    s.loops.forEach(function (l, k) {
+      if (l.size) facts.push('LOOP on ' + LOOP_NAMES[k] + ': ticks ' + l.start + '–' + Math.min(29, l.start + l.size - 1) + ' repeat while it plays.');
+    });
+    var snd = (DATA.snd[L.CART] || {})[i];
+    if (snd) {
+      facts.push('In the game: <code>play(SND.' + snd + ')</code>, which is <code>sfx(' + i + ')</code> on channel 3.');
+      // play() lets a sound run (duration -1): one that never gets quiet keeps going
+      if (s.loops[1].size || s.ticks[29].vol > 0) {
+        facts.push('In the game it never stops by itself: its ' + (s.loops[1].size ? 'VOL loops' : 'last tick isn\'t silent') +
+          ', so it sounds until another sound plays on channel 3.');
+      }
+    }
+    return facts;
+  }
+
+  function sfxChanges(i) {
+    var a = sample(orig.sfx, i), b = sample(sfxData(), i), out = [];
+    ENVELOPES.forEach(function (e) {
+      var ticks = [];
+      for (var t = 0; t < 30; t++) if (a.ticks[t][e[0]] !== b.ticks[t][e[0]]) ticks.push(t);
+      if (!ticks.length) return;
+      var how = '';
+      if (e[0] === 'vol') {
+        var up = ticks.every(function (t) { return b.ticks[t].vol > a.ticks[t].vol; });
+        var down = ticks.every(function (t) { return b.ticks[t].vol < a.ticks[t].vol; });
+        how = up ? ': louder' : down ? ': quieter' : '';
+      }
+      out.push(e[1] + ' at tick' + (ticks.length > 1 ? 's ' : ' ') + ranges(ticks) + how);
+    });
+    if (a.note !== b.note || a.octave !== b.octave) out.push('Base note ' + noteName(a.note, a.octave) + ' → ' + noteName(b.note, b.octave));
+    if (a.speed !== b.speed) out.push('SPD ' + a.speed + ' → ' + b.speed);
+    if (a.down !== b.down) out.push('ARPEGG DOWN switched ' + (b.down ? 'on' : 'off'));
+    if (a.x16 !== b.x16) out.push('PITCH x16 switched ' + (b.x16 ? 'on' : 'off'));
+    if (a.left !== b.left || a.right !== b.right) out.push('L / R speakers');
+    a.loops.forEach(function (l, k) {
+      var m = b.loops[k];
+      if (l.start !== m.start || l.size !== m.size) out.push('LOOP on ' + LOOP_NAMES[k] + ': start ' + l.start + ', size ' + l.size + ' → start ' + m.start + ', size ' + m.size);
+    });
+    return out;
+  }
+
+  function resetSample(i) {
+    var o = WAVES + SAMPLE * i;
+    sfxData().set(orig.sfx.subarray(o, o + SAMPLE), o);
+  }
+  function changedWaves() {
+    var data = sfxData(), out = [];
+    for (var w = 0; w < 16; w++) {
+      for (var k = 0; k < 16; k++) if (data[w * 16 + k] !== orig.sfx[w * 16 + k]) { out.push(w); break; }
+    }
+    return out;
+  }
+
+  function renderSfxChanges(i) {
+    var box = $('sfx-changes');
+    box.innerHTML = '';
+    var mine = sfxChanges(i);
+    var head = el('p');
+    head.innerHTML = '<b>' + (DATA.sfx[i] ? DATA.sfx[i] + ' (SFX ' + i + ')' : 'SFX ' + i) + '</b>' +
+      (mine.length ? ':' : ': nothing changed yet. Draw in a graph, then play it again.');
+    box.appendChild(head);
+    if (mine.length) {
+      var ul = el('ul', 'changes');
+      mine.forEach(function (c) { ul.appendChild(el('li', null, c)); });
+      box.appendChild(ul);
+      var r = el('button', 'btn small', 'Reset this sound');
+      r.type = 'button';
+      r.addEventListener('click', function () { resetSample(i); L.refresh(); });
+      box.appendChild(r);
+    }
+    var others = [];
+    for (var k = 0; k < SAMPLES; k++) if (k !== i && sampleChanged(k)) others.push(k);
+    if (others.length) {
+      var p = el('p', null, 'Also changed: ');
+      var chips = el('span', 'chips');
+      chips.style.display = 'inline-flex';
+      others.forEach(function (k) {
+        var c = el('button', 'chip changed');
+        c.type = 'button';
+        c.appendChild(el('span', 'n', String(k)));
+        c.appendChild(document.createTextNode(DATA.sfx[k] || 'sound ' + k));
+        c.addEventListener('click', function () { M._lab_sfx_select(k); });
+        chips.appendChild(c);
+      });
+      p.appendChild(chips);
+      box.appendChild(p);
+    }
+    var waves = changedWaves();
+    if (waves.length) {
+      var wp = el('p', null, 'Waveform' + (waves.length > 1 ? 's ' : ' ') + waves.join(', ') + ' changed (every sound that uses ' +
+        (waves.length > 1 ? 'them' : 'it') + ' sounds different). ');
+      var wr = el('button', 'btn small', 'Reset the waveforms');
+      wr.type = 'button';
+      wr.addEventListener('click', function () { sfxData().set(orig.sfx.subarray(0, WAVES), 0); L.refresh(); });
+      wp.appendChild(wr);
+      box.appendChild(wp);
+    }
+  }
+
+  function updateSfx(slow) {
+    var view = SFX.view;
+    var i = M._lab_sfx_index();
+    var pos = s8(ram(SFX_POS + 1));   // channel 0's place in the volume envelope; -1: silent
+    if (i !== view.sfx) {
+      Object.keys(sfxChips).forEach(function (k) { sfxChips[k].setAttribute('aria-pressed', String(Number(k) === i)); });
+      $('sfx-title').textContent = DATA.sfx[i] ? i + ' · ' + DATA.sfx[i] : 'Sound ' + i;
+      slow = true;
+    }
+    if (slow) {
+      var s = sample(sfxData(), i);
+      var key = JSON.stringify(s);
+      if (key !== view.sfxKey || i !== view.sfx) {
+        view.sfxKey = key;
+        var bars = $('sfx-ticks').children;
+        for (var t = 0; t < 30; t++) bars[t].style.height = Math.round(4 + s.ticks[t].vol / 15 * 96) + '%';
+        var ul = $('sfx-facts');
+        ul.innerHTML = '';
+        sfxFacts(i, s).forEach(function (f) { var li = el('li'); li.innerHTML = f; ul.appendChild(li); });
+        view.pos = null;
+      }
+      var changes = JSON.stringify([i, sfxChanges(i), changedWaves(), Object.keys(sfxChips).map(function (k) { return sampleChanged(Number(k)); })]);
+      if (changes !== view.sfxChanges) {
+        view.sfxChanges = changes;
+        renderSfxChanges(i);
+        Object.keys(sfxChips).forEach(function (k) { sfxChips[k].classList.toggle('changed', sampleChanged(Number(k))); });
+      }
+    }
+    view.sfx = i;
+    if (pos !== view.pos) {
+      view.pos = pos;
+      var b = $('sfx-ticks').children;
+      var spd = sample(sfxData(), i).speed;
+      for (var k = 0; k < 30; k++) {
+        b[k].className = (pos < 0 || k < pos ? 'on' : k === pos ? 'now' : '') + (played(spd, k) ? '' : ' skip');
+      }
+      var st = $('sfx-status');
+      st.classList.toggle('playing', pos >= 0);
+      if (pos >= 0) {
+        // each graph has its own place: a graph with a LOOP goes round its loop
+        var cur = sample(sfxData(), i).ticks, at = function (k) { return Math.max(0, s8(ram(SFX_POS + k))); };
+        var vol = cur[pos].vol, wave = cur[at(0)].wave, chord = cur[at(2)].chord, pitch = cur[at(3)].pitch;
+        st.textContent = 'Now playing tick ' + pos + ' of 30: loudness ' + vol + ', waveform ' + wave +
+          (chord ? ', ARPEGG +' + chord : '') + (pitch ? ', PITCH ' + (pitch > 0 ? '+' : '') + pitch : '');
+      } else {
+        st.textContent = 'Not playing. Each bar is one tick: the taller, the louder' +
+          (spd > 0 ? '; the faint ones are skipped at this speed.' : '.');
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Music
+  // ---------------------------------------------------------------------------
+  var trackChips = {};
+
+  function buildTrackList() {
+    var box = $('track-list');
+    box.innerHTML = '';
+    for (var t = 0; t < TRACKS; t++) {
+      if (!track(orig.music, t).length) continue;
+      (function (t) {
+        var c = el('button', 'chip');
+        c.type = 'button';
+        c.setAttribute('aria-pressed', 'false');
+        c.appendChild(el('span', 'n', String(t)));
+        c.appendChild(document.createTextNode(trackName(t)));
+        c.addEventListener('click', function (e) { playTrack(t, e); });
+        trackChips[t] = c;
+        box.appendChild(c);
+      })(t);
+    }
+    var ch = $('channels');
+    ch.innerHTML = '';
+    for (var c = 0; c < 4; c++) {
+      (function (c) {
+        var d = el('div', 'channel');
+        d.appendChild(el('span', 'num', String(c + 1)));
+        d.appendChild(el('div', 'what'));
+        var btns = el('div', 'btns');
+        var mute = el('button', 'btn small', 'Mute'), solo = el('button', 'btn small', 'Solo');
+        mute.type = solo.type = 'button';
+        mute.addEventListener('click', function () { M._lab_music_set_channel(c, M._lab_music_channel(c) ? 0 : 1); });
+        solo.addEventListener('click', function () {
+          var alone = true;
+          for (var k = 0; k < 4; k++) if (k !== c && M._lab_music_channel(k)) alone = false;
+          for (k = 0; k < 4; k++) M._lab_music_set_channel(k, alone || k === c ? 1 : 0);
+        });
+        btns.appendChild(mute);
+        btns.appendChild(solo);
+        d.appendChild(btns);
+        ch.appendChild(d);
+      })(c);
+    }
+  }
+
+  function playTrack(t, e) {
+    L.ensure(1);
+    M._lab_music_view(1);
+    if (t != null) M._lab_music_select(t, 0);
+    M._lab_music_play(-1);
+    if (byMouse(e)) L.canvas.focus({ preventScroll: true });
+  }
+
+  function musicState() {
+    var flags = ram(MUSIC_STATE + 3);
+    return { track: s8(ram(MUSIC_STATE)), frame: s8(ram(MUSIC_STATE + 1)), row: s8(ram(MUSIC_STATE + 2)), status: (flags >> 1) & 3 };
+  }
+
+  function tempoHtml(tr) {
+    var perSecond = tr.tempo * 6 / tr.speed / 15;
+    var rps = Math.round(perSecond * 10) / 10;
+    var frame = tr.rows / perSecond;
+    return '<p><b>TEMPO ' + tr.tempo + '</b> and <b>SPD ' + tr.speed + '</b>: ' + rps + ' rows every second.</p>' +
+      '<p>A frame of ' + tr.rows + ' rows lasts ' + seconds(frame) + (tr.length > 1 ? '; this song\'s ' + tr.length +
+      ' frames take ' + seconds(frame * tr.length) : '') + '.</p>' +
+      '<p class="hint">Twice the TEMPO plays twice as fast; twice the SPD plays half as fast. In the editor, click TEMPO to ' +
+      'raise it by one (right-click lowers it; <kbd>Shift</kbd>+click goes ten at a time), then play the song again.</p>';
+  }
+
+  function updateMusic(slow) {
+    var view = MUSIC.view;
+    var data = musicData();
+    var t = M._lab_music_track(), f = M._lab_music_frame();
+    var ms = musicState(), playing = ms.status !== 0 && ms.track >= 0;
+    var tr = track(data, playing ? ms.track : t);
+    var shown = playing ? ms.track : t;
+
+    if (shown !== view.track) {
+      Object.keys(trackChips).forEach(function (k) { trackChips[k].setAttribute('aria-pressed', String(Number(k) === shown)); });
+      $('music-title').textContent = 'Track ' + shown + ' · ' + trackName(shown);
+      view.track = shown;
+    }
+    var statusKey = [playing, ms.track, ms.frame, ms.row, t, f, tr.length, tr.rows].join();
+    if (statusKey !== view.status) {
+      view.status = statusKey;
+      var st = $('music-status');
+      st.classList.toggle('playing', playing);
+      st.textContent = playing
+        ? 'Playing frame ' + ms.frame + ' (of ' + Math.max(tr.length, 1) + '), row ' + Math.max(ms.row, 0) + ' of ' + tr.rows
+        : 'Stopped. The tracker shows frame ' + f + '. Click a song or ▶ Play.';
+      $('music-meter').style.width = playing ? ((Math.max(ms.row, 0) + 1) / tr.rows * 100) + '%' : '0';
+    }
+    var tempoKey = [tr.tempo, tr.speed, tr.rows, tr.length].join();
+    if (tempoKey !== view.tempo) { view.tempo = tempoKey; $('tempo').innerHTML = tempoHtml(tr); }
+
+    // the channels: what each one plays now (or, stopped, in the frame on screen)
+    var frame = playing ? ms.frame : f, chans = $('channels').children;
+    var ons = [0, 1, 2, 3].map(function (c) { return M._lab_music_channel(c); });
+    for (var c = 0; c < 4; c++) {
+      var on = ons[c];
+      var id = tr.frames[Math.max(0, frame)] ? tr.frames[Math.max(0, frame)][c] : 0;
+      var vol = ram(REGISTERS + c * 18 + 1) >> 4;
+      var note = playing && id ? lastNote(data, id, Math.max(ms.row, 0)) : null;
+      var inst = id ? (note && note.sfx != null ? note.sfx : firstInstrument(data, id)) : -1;
+      var key = [ons, id, playing, note && note.name, note && note.off, inst, vol > 0].join();
+      if (key === view['ch' + c]) continue;
+      view['ch' + c] = key;
+      var d = chans[c];
+      d.classList.toggle('off', !on);
+      d.classList.toggle('sounding', playing && on && vol > 0);
+      var what = d.querySelector('.what');
+      what.innerHTML = '';
+      if (!id) {
+        what.appendChild(document.createTextNode(c === 3
+          ? 'empty on purpose: the game\'s sound effects play here (the code counts from 0, so it calls this channel 3)'
+          : 'nothing in this frame'));
+      } else {
+        what.appendChild(el('b', null, patternName(id)));
+        var line = 'pattern ' + id + (inst >= 0 ? ' · ' + sfxName(inst) : '');
+        if (note) line += note.off ? ' · note off' : ' · ' + note.name;
+        if (!on) line += ' · muted';
+        what.appendChild(el('small', null, line));
+      }
+      var alone = on && ons.filter(Boolean).length === 1;
+      var b = d.querySelectorAll('.btn');
+      b[0].setAttribute('aria-pressed', String(!on));
+      b[0].textContent = on ? 'Mute' : 'Unmute';
+      b[1].setAttribute('aria-pressed', String(alone));
+    }
+    if (slow) renderMusicChanges();
+  }
+
+  function musicChanges() {
+    var data = musicData(), out = [];
+    for (var p = 1; p <= PATTERNS; p++) {
+      var rows = [];
+      for (var r = 0; r < 64; r++) {
+        var o = (p - 1) * PATTERN + r * 3;
+        if (data[o] !== orig.music[o] || data[o + 1] !== orig.music[o + 1] || data[o + 2] !== orig.music[o + 2]) rows.push(r);
+      }
+      if (rows.length) {
+        var shown = rows.slice(0, 3).map(function (r) { return 'row ' + r + ': ' + rowText(orig.music, p, r) + ' → ' + rowText(data, p, r); });
+        var inst = firstInstrument(orig.music, p);
+        var odd = rows.filter(function (r) { var x = row(data, p, r); return x.note >= 4 && inst >= 0 && x.sfx !== inst; });
+        if (odd.length) {
+          shown.push('careful: row' + (odd.length > 1 ? 's ' : ' ') + ranges(odd) + ' now play' + (odd.length > 1 ? '' : 's') +
+            ' a different instrument than ' + sfxName(inst) + '. A new note takes the instrument of the last note you typed: ' +
+            'move the cursor onto its two SFX digits and type ' + inst);
+        }
+        if (rows.length > 3) shown.push('and ' + plural(rows.length - 3, 'more row'));
+        out.push({ kind: 'pattern', id: p, text: 'Pattern ' + p + ' · ' + patternName(p) + ': ' + shown.join('; ') });
+      }
+    }
+    for (var t = 0; t < TRACKS; t++) {
+      var a = track(orig.music, t), b = track(data, t), what = [];
+      if (a.tempo !== b.tempo) what.push('TEMPO ' + a.tempo + ' → ' + b.tempo);
+      if (a.speed !== b.speed) what.push('SPD ' + a.speed + ' → ' + b.speed);
+      if (a.rows !== b.rows) what.push('ROWS ' + a.rows + ' → ' + b.rows);
+      for (var f = 0; f < FRAMES; f++) {
+        for (var c = 0; c < 4; c++) {
+          if (a.frames[f][c] !== b.frames[f][c]) what.push('frame ' + f + ', channel ' + (c + 1) + ': pattern ' + a.frames[f][c] + ' → ' + b.frames[f][c]);
+        }
+      }
+      if (what.length) out.push({ kind: 'track', id: t, text: 'Track ' + t + ' · ' + trackName(t) + ': ' + what.join('; ') });
+    }
+    return out;
+  }
+
+  function renderMusicChanges() {
+    var view = MUSIC.view;
+    var list = musicChanges(), key = JSON.stringify(list);
+    if (key === view.musicChanges) return;
+    view.musicChanges = key;
+    var box = $('music-changes');
+    box.innerHTML = '';
+    if (!list.length) {
+      var hint = el('p', 'hint');
+      hint.innerHTML = 'Nothing yet. Try it: click the octave digit of a note in the tracker (the 6 in <code>E-616</code>) and ' +
+        'type another number, or raise TEMPO, then play the song again. Typing a whole new note (<kbd>Z</kbd>, <kbd>X</kbd>, ' +
+        '<kbd>C</kbd>… are the notes) gives it the octave and instrument of the last note you typed: at first that\'s octave 4 ' +
+        'and SFX 0, the jump sound. Type the octave and the instrument number after it, as lesson 16 shows.';
+      box.appendChild(hint);
+      return;
+    }
+    var ul = el('ul', 'changes');
+    list.forEach(function (item) {
+      var li = el('li', null, item.text);
+      var r = el('button', 'btn small', 'Reset');
+      r.type = 'button';
+      r.addEventListener('click', function () {
+        var o = item.kind === 'pattern' ? (item.id - 1) * PATTERN : PATTERNS * PATTERN + item.id * TRACK;
+        var n = item.kind === 'pattern' ? PATTERN : TRACK;
+        musicData().set(orig.music.subarray(o, o + n), o);
+        L.refresh();
+      });
+      li.appendChild(r);
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+  }
+
+
+  // ---------------------------------------------------------------------------
+  // The two editors
+  // ---------------------------------------------------------------------------
+  var SFX = {
+    id: 0, tab: 'Sound effects',
+    parts: SFX_PARTS,
+    save: { label: 'Save my sounds', file: 'my-sounds.png', what: 'the sounds',
+      parts: [['sfx', 'all 64 sound effects and the waveforms']] },
+    hint: function (touch) {
+      return touch
+        ? 'Tap a sound in the list below to hear it. <b>What\'s on the screen</b>, further down, says what each part of the editor does. Drawing in the graphs works best with a mouse.'
+        : 'Point at any part of the editor to find out what it does. Click a sound in the list below to hear it; after that, hold <kbd>Space</kbd> to hear it again.';
+    },
+    init: function () {
+      M = L.M();
+      orig.sfx = sfxData().slice();
+      SFX.available = true;
+    },
+    build: function (panels) {
+      panels.innerHTML =
+        '<section class="panel wide"><h2>The cart\'s sounds</h2>' +
+        '<p class="hint">Click a sound to open it in the editor and hear it.</p><div id="sfx-list"></div></section>' +
+        '<section class="panel"><h2 id="sfx-title">Sound</h2>' +
+        '<div class="ticks" id="sfx-ticks" aria-hidden="true"></div>' +
+        '<div class="tick-scale" aria-hidden="true"><span>0</span><span>tick</span><span>29</span></div>' +
+        '<p class="status" id="sfx-status"></p>' +
+        '<div class="row"><button type="button" class="btn play" id="sfx-play">▶ Play</button>' +
+        '<button type="button" class="btn" id="sfx-stop">■ Stop</button></div>' +
+        '<ul class="facts" id="sfx-facts"></ul></section>' +
+        '<section class="panel"><h2>What you changed</h2><div id="sfx-changes"></div></section>';
+      buildSfxList();
+      $('sfx-play').addEventListener('click', function (e) { playSfx(null, e); });
+      $('sfx-stop').addEventListener('click', function () { M._lab_sfx_play(0); });
+    },
+    start: function () { M._lab_sfx_select(0); },
+    update: function (slow) { updateSfx(slow); },
+    keep: function () { return M._lab_sfx_index(); },
+    restore: function (i) { M._lab_sfx_select(i); }
+  };
+
+  var MUSIC = {
+    id: 1, tab: 'Music',
+    usesTab: true, usesWheel: true,          // the tracker: next pattern, scrolling the rows
+    parts: MUSIC_PARTS,
+    save: { label: 'Save my music', file: 'my-music.png', what: 'the music',
+      parts: [['music', 'the songs'], ['sfx', 'the instruments they play (and every sound effect)']] },
+    hint: function (touch) {
+      return touch
+        ? 'Tap a song in the list below to play it. <b>What\'s on the screen</b>, further down, says what each part of the tracker does. Typing notes needs a keyboard.'
+        : 'Point at any part of the tracker to find out what it does. Click a song in the list below to play it; after that, <kbd>Space</kbd> stops and starts it.';
+    },
+    partAt: function () {
+      if (M._lab_music_tracker()) return null;
+      return { name: 'Piano view', text: 'notes drawn as a grid. This course uses the tracker: click the Music tab above, or TRACKER (the right-most icon at the top).' };
+    },
+    init: function () {
+      M = L.M();
+      orig.music = musicData().slice();
+      MUSIC.available = false;
+      for (var t = 0; t < TRACKS; t++) if (track(orig.music, t).length) MUSIC.available = true;
+    },
+    build: function (panels) {
+      panels.innerHTML =
+        '<section class="panel wide"><h2>The cart\'s songs</h2>' +
+        '<p class="hint">Click a song to open its track in the tracker and play it.</p><div class="chips" id="track-list"></div></section>' +
+        '<section class="panel"><h2 id="music-title">Now playing</h2><p class="status" id="music-status"></p>' +
+        '<div class="meter" aria-hidden="true"><i id="music-meter"></i></div>' +
+        '<div class="row"><button type="button" class="btn play" id="music-play">▶ Play the track</button>' +
+        '<button type="button" class="btn" id="music-stop">■ Stop</button></div>' +
+        '<h2 style="margin-top: 0.9rem">Tempo</h2><div id="tempo"></div></section>' +
+        '<section class="panel"><h2>The four channels</h2><div class="channels" id="channels"></div>' +
+        '<p class="hint">Mute a channel to hear what the others play. Solo keeps just that one. The editor\'s ' +
+        'on/off switches (next to each pattern number) move with these.</p></section>' +
+        '<section class="panel wide"><h2>What you changed</h2><div id="music-changes"></div></section>';
+      buildTrackList();
+      $('music-play').addEventListener('click', function (e) { playTrack(null, e); });
+      $('music-stop').addEventListener('click', function () { M._lab_music_stop(); });
+    },
+    start: function () { M._lab_music_select(track(orig.music, 1).length ? 1 : 0, 0); },
+    opened: function () { M._lab_music_view(1); },
+    update: function (slow) { updateMusic(slow); },
+    keep: function () { return [M._lab_music_track(), M._lab_music_frame()]; },
+    restore: function (k) { M._lab_music_select(k[0], k[1]); }
+  };
+
+  L.editor(SFX);
+  L.editor(MUSIC);
+})(LAB);
+// The Sprite Lab's editor (lab-core.js): sprites (2). Lessons 2-4, and the
+// Sprites tab of the Map Lab (lessons 6 and 18: tiles and their flags).
+(function (L) {
+  'use strict';
+  var $ = L.$, el = L.el, button = L.button, plural = L.plural, DATA = L.DATA, CODE = L.CODE;
+  var HERO = DATA.hero || 'the player';
+  var M = null;
+  var orig = {};
+  var TILES = 512 * 32, FLAGS = 512, PALETTE = 48;
+  var LESSON = Number(L.CART.slice(6));
+
+  function tiles() { return L.bytes('lab_tiles_data', TILES); }
+  function flags() { return L.bytes('lab_flags_data', FLAGS); }
+  function palette() { return L.bytes('lab_palette_data', PALETTE); }
+  // what the course calls a picture, unless this cart's slot is still empty
+  function name(id) {
+    if (L.tileEmpty(tiles(), id)) return 'empty';
+    return DATA.art[id] || (id < 256 ? 'tile ' : 'sprite ') + id;
+  }
+  // a color as the palette editor writes it: red, green, blue in hex
+  function rgbText(pal, c) { return L.hex(pal, c).slice(1).toUpperCase().replace(/(..)(?=.)/g, '$1 '); }
+  function flagTags(id) {
+    var f = flags()[id], out = [];
+    for (var b = 0; b < 8; b++) { var m = (f & (1 << b)) ? flagMeaning(b) : null; if (m) out.push(m[0]); }
+    return out;
+  }
+  function colorName(c) { return DATA.colors[c] || 'color ' + c; }
+  // what the course's code means by a flag, from the lesson that starts using it
+  function flagMeaning(bit) { return L.flagMeaning(bit, LESSON); }
+  function animOf(id) {
+    return (CODE.anims || []).filter(function (a) { return a.frames.indexOf(id) >= 0; })[0] || null;
+  }
+  function changedPixels(id) {
+    var a = orig.tiles, b = tiles(), n = 0;
+    for (var y = 0; y < 8; y++) for (var x = 0; x < 8; x++) if (L.pixel(a, id, x, y) !== L.pixel(b, id, x, y)) n++;
+    return n;
+  }
+  function changedTiles() {
+    var b = tiles(), out = [];
+    for (var id = 0; id < 512; id++) {
+      for (var k = 0; k < 32; k++) if (b[id * 32 + k] !== orig.tiles[id * 32 + k]) { out.push(id); break; }
+    }
+    return out;
+  }
+  function changedFlags() {
+    var f = flags(), out = [];
+    for (var id = 0; id < FLAGS; id++) if (f[id] !== orig.flags[id]) out.push(id);
+    return out;
+  }
+  function changedColors() {
+    var p = palette(), out = [];
+    for (var c = 0; c < 16; c++) {
+      if (p[c * 3] !== orig.palette[c * 3] || p[c * 3 + 1] !== orig.palette[c * 3 + 1] || p[c * 3 + 2] !== orig.palette[c * 3 + 2]) out.push(c);
+    }
+    return out;
+  }
+  function thumb(id, scale, data, pal) {
+    var cv = el('canvas', 'thumb');
+    L.paint(cv, data || tiles(), pal || palette(), id, 1, 1, scale || 2, 0);
+    return cv;
+  }
+
+  // ---------------------------------------------------------------------------
+  // The parts of the sprite editor (TIC-80's 240x136 screen)
+  // ---------------------------------------------------------------------------
+  var BASIC = [
+    { rects: [[4, 9, 11, 8]], name: 'ADVANCED', text: 'this switch shows more: the sprite\'s flags, the palette editor and the bits per pixel.' },
+    { rects: [[38, 9, 38, 9]], name: 'Number', text: 'the number of the picture you are editing: 0-255 are tiles, 256-511 sprites. spr() and the map use this number.' },
+    { rects: [[24, 20, 64, 64]], name: 'The big grid', text: 'the picture, blown up so you can draw it: click to paint a pixel with the color you picked, right-click to paint with the second color.' },
+    { rects: [[8, 38, 8, 30]], name: 'BRUSH SIZE', text: 'how many pixels each click paints: from one to four.' },
+    { rects: [[10, 92, 90, 13]], name: 'Tools', text: 'brush, color picker (takes a color from the picture), select, fill; then flip sideways, flip upside down, rotate and erase.' },
+    { rects: [[24, 112, 64, 17]], name: 'Palette', text: 'the 16 colors. Click one to draw with it. Right-click one to make it the second color, which the right mouse button draws with. Color 0 is see-through when the code says so, like spr(id, x, y, 0).' },
+    { rects: [[101, 7, 10, 19]], name: 'TILES / SPRITES', text: 'the two halves of the sheet: tiles (0-255, the map is made of these) and sprites (256-511, for things that move). The Tab key switches too.' },
+    { rects: [[111, 8, 128, 128]], name: 'The sheet', text: 'every picture of this half, 16 to a row. Click one to edit it; the white box marks it. Drag the slider on the top bar to edit bigger pieces (2x2, 4x4).' },
+    { rects: [[0, 0, 240, 8]], name: 'Top bar', text: 'the editors: code, sprites (this one), map, sound effects, music. On the right: cut, copy, paste, undo, redo, and the size slider.' }
+  ];
+  // what the ADVANCED switch adds
+  var ADVANCED = [
+    { rects: [[94, 27, 12, 48], [94, 76, 12, 8]], name: 'Flags', text: 'eight switches, 0 to 7, for this picture; the number under them is all eight in hex. They mean nothing on their own: the code asks fget(tile, flag), and the game decides what a flag does.' },
+    { rects: [[90, 114, 10, 10]], name: 'EDIT PALETTE', text: 'opens the palette editor: three sliders take the place of the tools, for the color you pick in the palette.' },
+    { rects: [[1, 111, 22, 18]], name: 'bank0 / bank1', text: 'which palette you edit: bank0 is the one the game draws with. bank1 belongs to a second screen layer this course doesn\'t use, so leave it on bank0.' },
+    { rects: [[24, 129, 64, 7]], name: 'BPP', text: 'bits per pixel: 4 gives 16 colors (what this course uses); 2 and 1 give fewer colors but more pictures.' }
+  ];
+  var SLIDERS = { rects: [[20, 86, 76, 22], [2, 87, 18, 21]], name: 'Palette editor', text: 'the red, green and blue of the color you picked. The box on the left shows them in hex, like 38 B7 64: each goes from 00 to FF (that is 0 to 255). Drag a slider and every picture using that color changes at once.' };
+
+  function parts() {
+    if (!M._lab_sprite_advanced()) return BASIC;
+    // the palette editor's sliders take the place of the tools and the brush size
+    if (M._lab_sprite_palette_open()) {
+      return [SLIDERS].concat(ADVANCED, BASIC.filter(function (p) { return p.name !== 'Tools' && p.name !== 'BRUSH SIZE'; }));
+    }
+    return ADVANCED.concat(BASIC);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Panels
+  // ---------------------------------------------------------------------------
+  var chips = {};
+
+  function buildList() {
+    var box = $('sprite-list');
+    box.innerHTML = '';
+    var groups = [['Sprites (256-511): things that move', 256, 512], ['Tiles (0-255): the map is made of these', 0, 256]];
+    if (L.MODE === 'map') groups.reverse();
+    groups.forEach(function (g) {
+      var ids = [];
+      for (var id = g[1]; id < g[2]; id++) if (!L.tileEmpty(orig.tiles, id)) ids.push(id);
+      if (!ids.length) return;
+      box.appendChild(el('p', 'group-name', g[0]));
+      var row = el('div', 'chips');
+      ids.forEach(function (id) {
+        var c = button('chip pic', null, function (e) {
+          L.ensure(2);
+          M._lab_sprite_select(id);
+          if (L.byMouse(e)) L.canvas.focus({ preventScroll: true });
+        });
+        c.setAttribute('aria-pressed', 'false');
+        c.appendChild(thumb(id, 2));
+        c.appendChild(el('span', 'n', String(id)));
+        c.appendChild(document.createTextNode(name(id)));
+        flagTags(id).forEach(function (t) { c.appendChild(el('span', 'tag', t)); });
+        chips[id] = c;
+        row.appendChild(c);
+      });
+      box.appendChild(row);
+    });
+  }
+
+  function buildPalette() {
+    var box = $('palette-swatches');
+    box.innerHTML = '';
+    for (var c = 0; c < 16; c++) {
+      (function (c) {
+        // the Sprite Lab of lesson 4 edits colors; the others pick the color to draw with
+        var b = button('swatch', null, function (e) {
+          L.ensure(2);
+          if (L.MODE === 'palette') M._lab_sprite_palette(c); else M._lab_sprite_set_color(c);
+          if (L.byMouse(e)) L.canvas.focus({ preventScroll: true });
+        });
+        b.title = c + ' · ' + colorName(c);
+        b.appendChild(el('span', 'sw'));
+        b.appendChild(el('span', 'n', String(c)));
+        box.appendChild(b);
+      })(c);
+    }
+  }
+
+  function renderSwatches() {
+    var p = palette(), changed = changedColors();
+    var sw = $('palette-swatches').children;
+    for (var c = 0; c < 16; c++) {
+      sw[c].querySelector('.sw').style.background = L.hex(p, c);
+      sw[c].classList.toggle('changed', changed.indexOf(c) >= 0);
+    }
+  }
+
+  function facts(id) {
+    var out = [], f = flags()[id];
+    var code = (CODE.names || {})[id], mk = L.marker(id);
+    if (L.tileEmpty(tiles(), id)) {
+      out.push((id < 256 ? 'Tile ' : 'Sprite ') + id + ' is empty: nothing is drawn here yet. It\'s yours to draw in.');
+      return out;
+    }
+    out.push(id < 256
+      ? '<b>Tile ' + id + '</b>, on the TILES half of the sheet: the map can use it.'
+      : '<b>Sprite ' + id + '</b>, on the SPRITES half of the sheet: for things that move.');
+    if (code) out.push('In the code: ' + code.map(function (c) { return '<code>' + c + '</code>'; }).join(', ') + '.');
+    if (mk) out.push(mk + ' The game never draws this tile itself.');
+    else if (id >= 256 && code) out.push('The game draws it with <code>spr(' + id + ', x, y, 0)</code>: the last 0 makes color 0 (' + colorName(0) + ') see-through.');
+    else if (id >= 256) out.push('This lesson\'s code doesn\'t draw it yet.');
+    var bits = [];
+    for (var b = 0; b < 8; b++) if (f & (1 << b)) bits.push(b);
+    if (bits.length) {
+      out.push(bits.map(function (b) {
+        var m = flagMeaning(b);
+        return 'Flag ' + b + ' is on' + (m ? ' (' + m[0] + '): ' + m[1] : ': this lesson\'s game doesn\'t use it yet') + '.';
+      }).join(' '));
+    } else if (id < 256 && !mk) {
+      out.push('No flags: ' + (flagMeaning(0) ? HERO + ' walks through it.' : 'turn on ADVANCED to see the flags.'));
+    }
+    var used = [];
+    var t = tiles();
+    for (var y = 0; y < 8; y++) for (var x = 0; x < 8; x++) { var c = L.pixel(t, id, x, y); if (used.indexOf(c) < 0) used.push(c); }
+    used.sort(function (a, b) { return a - b; });
+    out.push('Colors: ' + used.map(function (c) {
+      return '<span class="dot" style="background:' + L.hex(palette(), c) + '"></span>' + c + ' ' + colorName(c);
+    }).join(', ') + '.');
+    return out;
+  }
+
+  function renderAnim(id, now) {
+    var a = animOf(id), box = $('sprite-anim');
+    box.hidden = !a;
+    $('anim-text').hidden = !a;
+    if (!a) return;
+    var view = SPRITE.view;
+    var frame = Math.floor(now / (1000 * a.speed / 60)) % a.frames.length;
+    if (view.animName !== a.name) {
+      view.animName = a.name;
+      $('anim-text').innerHTML = '<code>' + a.name + '</code> shows ' + a.frames.join(' → ') + ': a new picture every ' +
+        plural(a.speed, 'tick') + ' of the game (a tick is 1/60 of a second), so ' + (Math.round(600 / a.speed) / 10) +
+        ' pictures a second. Draw on one of them and watch it change here.';
+    }
+    var key = [a.name, frame, view.dataKey].join();
+    if (key === view.animKey) return;
+    view.animKey = key;
+    L.paint($('anim-canvas'), tiles(), palette(), a.frames[frame], 1, 1, 10, 0);
+    $('anim-frame').textContent = 'picture ' + (frame + 1) + ' of ' + a.frames.length + ': ' + a.frames[frame];
+  }
+
+  function renderChanges() {
+    var box = $('sprite-changes');
+    box.innerHTML = '';
+    var pics = changedTiles(), fl = changedFlags(), cols = changedColors();
+    if (!pics.length && !fl.length && !cols.length) {
+      box.appendChild(el('p', 'hint', L.MODE === 'palette'
+        ? 'Nothing yet. Drag a slider of the palette editor: the old and the new color show up here.'
+        : 'Nothing yet. Pick a color, click on the big grid, and watch the picture change here and in the game.'));
+      return;
+    }
+    var ul = el('ul', 'changes');
+    pics.forEach(function (id) {
+      var li = el('li', 'pic-change');
+      li.appendChild(thumb(id, 3, orig.tiles, orig.palette));
+      li.appendChild(document.createTextNode(' → '));
+      li.appendChild(thumb(id, 3));
+      li.appendChild(document.createTextNode(' ' + id + ' · ' + name(id) + ': ' + plural(changedPixels(id), 'pixel') + ' '));
+      li.appendChild(button('btn small', 'Reset', function () {
+        tiles().set(orig.tiles.subarray(id * 32, id * 32 + 32), id * 32);
+        L.refresh();
+      }));
+      ul.appendChild(li);
+    });
+    fl.forEach(function (id) {
+      var before = orig.flags[id], after = flags()[id], what = [];
+      for (var b = 0; b < 8; b++) {
+        if ((before ^ after) & (1 << b)) {
+          var m = flagMeaning(b);
+          what.push('flag ' + b + (m ? ' (' + m[0] + ')' : '') + ' ' + (after & (1 << b) ? 'on' : 'off'));
+        }
+      }
+      var li = el('li', null, id + ' · ' + name(id) + ': ' + what.join(', ') + ' ');
+      li.appendChild(button('btn small', 'Reset', function () { flags()[id] = orig.flags[id]; L.refresh(); }));
+      ul.appendChild(li);
+    });
+    cols.forEach(function (c) {
+      var li = el('li');
+      li.innerHTML = 'Color ' + c + ' (' + colorName(c) + '): <span class="dot" style="background:' + L.hex(orig.palette, c) +
+        '"></span>' + rgbText(orig.palette, c) + ' → <span class="dot" style="background:' + L.hex(palette(), c) + '"></span>' +
+        rgbText(palette(), c) + ' ';
+      li.appendChild(button('btn small', 'Reset', function () {
+        palette().set(orig.palette.subarray(c * 3, c * 3 + 3), c * 3);
+        L.refresh();
+      }));
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+  }
+
+  // a cheap fingerprint of what the lab draws from, to redraw only on a change
+  function dataKey() {
+    var t = tiles(), p = palette(), f = flags(), h = 0, k;
+    for (k = 0; k < t.length; k++) h = (h * 31 + t[k]) | 0;
+    for (k = 0; k < p.length; k++) h = (h * 31 + p[k]) | 0;
+    for (k = 0; k < f.length; k++) h = (h * 31 + f[k]) | 0;
+    return h;
+  }
+
+  function update(slow) {
+    var view = SPRITE.view, id = M._lab_sprite_index(), now = performance.now();
+    var advanced = M._lab_sprite_advanced() + ':' + M._lab_sprite_palette_open();
+    if (advanced !== view.advanced) {
+      // the ADVANCED view and the palette editor have other parts on screen
+      if (view.advanced !== undefined) L.relegend();
+      view.advanced = advanced;
+    }
+    var color = M._lab_sprite_color();
+    if (color !== view.color) {
+      // the color the brush draws with (and the palette editor edits)
+      view.color = color;
+      var sw = $('palette-swatches').children;
+      for (var c = 0; c < 16; c++) sw[c].setAttribute('aria-pressed', String(c === color));
+    }
+    var vbank1 = M._lab_sprite_vbank1() && M._lab_sprite_palette_open();
+    if (vbank1 !== view.vbank1) { view.vbank1 = vbank1; $('vbank1').hidden = !vbank1; }
+    if (slow) {
+      var key = dataKey();
+      if (key !== view.dataKey) {
+        view.dataKey = key;
+        view.id = null;
+        Object.keys(chips).forEach(function (k) {
+          var cv = chips[k].querySelector('canvas');
+          L.paint(cv, tiles(), palette(), Number(k), 1, 1, 2, 0);
+          chips[k].classList.toggle('changed', changedPixels(Number(k)) > 0 || flags()[k] !== orig.flags[k]);
+        });
+        renderSwatches();
+        renderChanges();
+      }
+    }
+    if (id !== view.id) {
+      view.id = id;
+      Object.keys(chips).forEach(function (k) { chips[k].setAttribute('aria-pressed', String(Number(k) === id)); });
+      $('sprite-title').textContent = id + ' · ' + name(id);
+      L.paint($('sprite-big'), tiles(), palette(), id, 1, 1, 12, id >= 256 ? 0 : -1);
+      var ul = $('sprite-facts');
+      ul.innerHTML = '';
+      facts(id).forEach(function (f) { var li = el('li'); li.innerHTML = f; ul.appendChild(li); });
+    }
+    renderAnim(id, now);
+  }
+
+  var SPRITE = {
+    id: 2, tab: 'Sprites',
+    usesTab: true,                  // Tab: TILES / SPRITES
+    parts: function () { return parts(); },
+    save: { label: 'Save my sprites', file: 'my-sprites.png', what: 'your pictures',
+      parts: [['sprites', 'the sprites (256-511)'], ['tiles', 'the tiles (0-255)'], ['flags', 'the flags'], ['palette', 'the palette']] },
+    hint: function (touch) {
+      if (L.MODE === 'palette') {
+        return touch
+          ? 'Tap a color under <b>The palette</b> to open it in the palette editor. Moving the sliders works best with a mouse.'
+          : 'Drag the red, green and blue sliders and watch every picture that uses the color change. Click a color under <b>The palette</b> to edit another one.';
+      }
+      return touch
+        ? 'Tap a picture in the list below to open it. <b>What\'s on the screen</b>, further down, says what each part of the editor does. Drawing works best with a mouse.'
+        : 'Point at any part of the editor to find out what it does. Pick a picture in the list below (or on the sheet), pick a color, and draw on the big grid. <b>▶ Try it in the game</b> shows your change in the game.';
+    },
+    init: function () {
+      M = L.M();
+      orig.tiles = tiles().slice();
+      orig.flags = flags().slice();
+      orig.palette = palette().slice();
+      SPRITE.available = false;
+      for (var id = 0; id < 512; id++) if (!L.tileEmpty(orig.tiles, id)) SPRITE.available = true;
+    },
+    // the picture (and its animation) first, beside the palette and the changes, where you
+    // can see them while you draw; the list of pictures under them
+    build: function (panels) {
+      var paletteFirst = L.MODE === 'palette';
+      panels.innerHTML =
+        (paletteFirst ? '<section class="panel wide" id="palette-panel"></section>' : '') +
+        '<section class="panel"><h2 id="sprite-title">Picture</h2>' +
+        '<div class="pics"><canvas id="sprite-big" class="big-pic" aria-hidden="true"></canvas>' +
+        '<div id="sprite-anim" class="anim" hidden><canvas id="anim-canvas" class="big-pic" aria-hidden="true"></canvas>' +
+        '<p class="hint" id="anim-frame"></p></div></div>' +
+        '<p id="anim-text" class="anim-text" hidden></p>' +
+        '<ul class="facts" id="sprite-facts"></ul></section>' +
+        '<section class="panel"><div id="palette-here"><h2>The palette</h2><div class="swatches" id="palette-swatches"></div>' +
+        '<p class="hint">' + (paletteFirst
+          ? 'Click a color to open it in the palette editor: its red, green and blue. Change one and every picture that uses it changes.'
+          : 'Click a color to draw with it. (Lesson 4 is about changing the colors themselves.)') + '</p>' +
+        '<p class="away" id="vbank1" hidden>The palette editor is on <b>bank1</b>, which the game doesn\'t draw with: click ' +
+        '<b>bank0</b> (left of the palette).</p></div>' +
+        '<h2 style="margin-top: 0.9rem">What you changed</h2><div id="sprite-changes"></div></section>' +
+        '<section class="panel wide"><h2>The cart\'s pictures</h2>' +
+        '<p class="hint">Click a picture to open it in the editor. The sheet has two halves and the editor shows one at a ' +
+        'time: tiles (0-255) and sprites (256-511). Every picture keeps its number, and its place, in every lesson.</p>' +
+        '<div id="sprite-list"></div></section>';
+      if (paletteFirst) $('palette-panel').appendChild($('palette-here'));
+      buildList();
+      buildPalette();
+    },
+    start: function (params) {
+      var id = Number(params.get('sprite'));
+      if (L.MODE === 'map') {
+        // the Map Lab's sprites are its tiles and their flags
+        id = !L.tileEmpty(orig.tiles, 2) ? 2 : -1;
+        for (var t = 1; id < 0 && t < 256; t++) if (!L.tileEmpty(orig.tiles, t)) id = t;
+        M._lab_sprite_set_advanced(1);
+      }
+      if (!(id >= 0 && id < 512) || L.tileEmpty(orig.tiles, id)) id = !L.tileEmpty(orig.tiles, 256) ? 256 : 1;
+      M._lab_sprite_select(id);
+      if (L.MODE === 'palette') M._lab_sprite_palette(Number(params.get('color')) || 6);
+    },
+    update: update,
+    keep: function () {
+      return [M._lab_sprite_index(), M._lab_sprite_advanced(), M._lab_sprite_palette_open() ? M._lab_sprite_color() : -2];
+    },
+    restore: function (k) {
+      M._lab_sprite_select(k[0]);
+      M._lab_sprite_set_advanced(k[1]);
+      if (k[2] >= 0) M._lab_sprite_palette(k[2]);
+    }
+  };
+
+  L.editor(SPRITE);
+})(LAB);
+// The Map Lab's editor (lab-core.js): the map (3), and its world view. Lessons 6 and 18.
+(function (L) {
+  'use strict';
+  var $ = L.$, el = L.el, button = L.button, plural = L.plural, ranges = L.ranges, DATA = L.DATA, CODE = L.CODE;
+  var HERO = DATA.hero || 'the player';
+  var M = null;
+  var orig = {};
+  var W = 240, H = 136, CELLS = W * H, TILES = 512 * 32, FLAGS = 512, PALETTE = 48;
+  var LESSON = Number(L.CART.slice(6));
+  var LEVELS = (DATA.levels || []).filter(function (l) { return l.lesson <= LESSON; });
+
+  function map() { return L.bytes('lab_map_data', CELLS); }
+  function tiles() { return L.bytes('lab_tiles_data', TILES); }
+  function flags() { return L.bytes('lab_flags_data', FLAGS); }
+  function palette() { return L.bytes('lab_palette_data', PALETTE); }
+  function name(id) { return id === 0 ? 'empty' : DATA.art[id] || 'tile ' + id; }
+  function levelAt(x, y) {
+    return LEVELS.filter(function (l) { return x >= l.x && x < l.x + l.w && y >= l.y && y < l.y + l.h; })[0] || null;
+  }
+  function flagMeaning(bit) { return L.flagMeaning(bit, LESSON); }
+
+  // ---------------------------------------------------------------------------
+  // The parts of the map editor and the world view (TIC-80's 240x136 screen)
+  // ---------------------------------------------------------------------------
+  var PARTS = [
+    { rects: [[112, 0, 30, 8]], name: 'Tile number', text: 'while the mouse is over the map: the number of the tile under it (#000 is empty).' },
+    { rects: [[187, 0, 53, 8]], name: 'Tools', text: 'WORLD MAP (or the Tab key), the grid, then draw, drag the map, select and fill; the last icon opens the tile sheet (or press Shift) to pick the tile you paint with.' },
+    { rects: [[0, 8, 240, 128]], name: 'The map', text: 'one screen of the map, 30 x 17 cells of 8 x 8 pixels; each cell holds one tile. Click to paint; drag with the right mouse button (or hold Space and drag) to move around; a middle-click picks up the tile under the mouse. The label by the mouse is the cell: x:y.' },
+    { rects: [[0, 0, 112, 8], [142, 0, 45, 8]], name: 'Top bar', text: 'the editors: code, sprites, map (this one), sound effects, music; then cut, copy, paste, undo and redo.' }
+  ];
+  var WORLD_PARTS = [
+    { rects: [[0, 0, 240, 136]], name: 'World map', text: 'the whole map at once, 240 x 136 cells, one pixel each; the gray lines mark the screens. The frame is the screen the map editor shows: click somewhere to go there. Tab goes back.' }
+  ];
+
+  // ---------------------------------------------------------------------------
+  // The whole map, small: one pixel a cell in the color its tile mostly has
+  // ---------------------------------------------------------------------------
+  function tileColors() {
+    var t = tiles(), p = palette(), out = [];
+    for (var id = 0; id < 256; id++) {
+      var count = new Array(16).fill(0), best = 0;
+      for (var y = 0; y < 8; y++) for (var x = 0; x < 8; x++) count[L.pixel(t, id, x, y)]++;
+      for (var c = 1; c < 16; c++) if (count[c] > count[best] || best === 0 && count[c]) best = c;
+      out.push(id === 0 || L.tileEmpty(t, id) ? [26, 28, 44] : L.color(p, best));
+    }
+    return out;
+  }
+  // the part of the map the cart uses, in whole screens (30 x 17 cells): the rest is empty
+  var area = { x: 0, y: 0, w: 30, h: 17 };
+  function findArea() {
+    var x0 = W, y0 = H, x1 = 0, y1 = 0;
+    function take(x, y) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x + 1); y1 = Math.max(y1, y + 1); }
+    for (var i = 0; i < CELLS; i++) if (orig.map[i]) take(i % W, Math.floor(i / W));
+    LEVELS.forEach(function (l) { take(l.x, l.y); take(l.x + l.w - 1, l.y + l.h - 1); });
+    if (x1 === 0) return;
+    area.x = Math.floor(x0 / 30) * 30;
+    area.y = Math.floor(y0 / 17) * 17;
+    area.w = Math.min(W, Math.ceil(x1 / 30) * 30) - area.x;
+    area.h = Math.min(H, Math.ceil(y1 / 17) * 17) - area.y;
+  }
+  function drawMinimap() {
+    var cv = $('minimap'), ctx = cv.getContext('2d'), img = ctx.createImageData(area.w, area.h), d = img.data;
+    var m = map(), cols = tileColors();
+    for (var y = 0; y < area.h; y++) {
+      for (var x = 0; x < area.w; x++) {
+        var c = cols[m[(area.y + y) * W + area.x + x]], o = (y * area.w + x) * 4;
+        d[o] = c[0]; d[o + 1] = c[1]; d[o + 2] = c[2]; d[o + 3] = 255;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  function place(div, x, y, w, h) {
+    div.style.left = ((x - area.x) / area.w * 100) + '%';
+    div.style.top = ((y - area.y) / area.h * 100) + '%';
+    div.style.width = (w / area.w * 100) + '%';
+    div.style.height = (h / area.h * 100) + '%';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Panels
+  // ---------------------------------------------------------------------------
+  function goTo(l) {
+    L.ensure(3);
+    M._lab_map_scroll(l.x * 8, l.y * 8);
+  }
+
+  function buildLevels() {
+    var box = $('level-list');
+    box.innerHTML = '';
+    LEVELS.forEach(function (l) {
+      var row = el('div', 'level');
+      var c = button('chip', null, function (e) {
+        goTo(l);
+        if (L.byMouse(e)) L.canvas.focus({ preventScroll: true });
+      });
+      c.appendChild(el('span', 'n', String(l.n)));
+      c.appendChild(document.createTextNode(l.name));
+      row.appendChild(c);
+      row.appendChild(el('span', 'hint', l.w + ' x ' + l.h + ' cells at (' + l.x + ', ' + l.y + ')'));
+      if (CODE.play) {
+        row.appendChild(button('btn small play', '▶ Play this level', function () {
+          L.run(CODE.play.replace('{n}', String(l.n)));
+        }));
+      }
+      box.appendChild(row);
+    });
+    var mm = $('minimap-box');
+    LEVELS.forEach(function (l) {
+      var r = el('div', 'mm-level');
+      place(r, l.x, l.y, l.w, l.h);
+      r.appendChild(el('span', null, l.name));
+      mm.appendChild(r);
+    });
+    var v = el('div', 'mm-view');
+    v.id = 'mm-view';
+    mm.appendChild(v);
+    var cv = $('minimap');
+    cv.width = area.w;
+    cv.height = area.h;
+    mm.style.aspectRatio = area.w + ' / ' + area.h;
+    cv.addEventListener('click', function (e) {
+      var b = e.currentTarget.getBoundingClientRect();
+      var cx = area.x + Math.floor((e.clientX - b.left) / b.width * area.w);
+      var cy = area.y + Math.floor((e.clientY - b.top) / b.height * area.h);
+      L.ensure(3);
+      // the view is 30 x 17 cells: center it there, without going off the map's edges
+      M._lab_map_scroll(Math.max(0, Math.min(W - 30, cx - 15)) * 8, Math.max(0, Math.min(H - 17, cy - 8)) * 8);
+    });
+  }
+
+  // the map cell under a point of the screen (the editor wraps around the map's edges)
+  function cellAt(sx, sy) {
+    var cx = Math.floor((sx + M._lab_map_x()) / 8), cy = Math.floor((sy + M._lab_map_y()) / 8);
+    return [((cx % W) + W) % W, ((cy % H) + H) % H];
+  }
+
+  // one cell, said in words
+  function cellHtml(x, y, id) {
+    var out = [], f = flags()[id], l = levelAt(x, y), mk = L.marker(id, l);
+    out.push('<b>Map cell (' + x + ', ' + y + ')</b>' + (l ? ', in ' + l.name : ', outside the levels') + '.');
+    if (id === 0) {
+      out.push('Empty: nothing is drawn here, so whatever is behind shows through.');
+      return out;
+    }
+    out.push('Tile <b>' + id + '</b> · ' + name(id) + '.');
+    if (mk) out.push(mk + ' The game never draws this tile itself.');
+    var bits = [];
+    for (var b = 0; b < 8; b++) if (f & (1 << b)) bits.push(b);
+    if (bits.length) {
+      out.push(bits.map(function (b) {
+        var m = flagMeaning(b);
+        return 'Flag ' + b + (m ? ' (' + m[0] + '): ' + m[1] : ' is on') + '.';
+      }).join(' '));
+    } else if (!mk && flagMeaning(0)) {
+      out.push('No flags: ' + HERO + ' passes through it, it\'s only a picture.');
+    }
+    return out;
+  }
+
+  function renderCell(target, x, y) {
+    var id = map()[y * W + x];
+    var key = [x, y, id, SPRITE_KEY()].join();
+    if (target.key === key) return;
+    target.key = key;
+    var box = target.el;
+    box.innerHTML = '';
+    var cv = el('canvas', 'cell-pic');
+    L.paint(cv, tiles(), palette(), id, 1, 1, 6, -1);
+    box.appendChild(cv);
+    var ul = el('ul', 'facts');
+    cellHtml(x, y, id).forEach(function (f) { var li = el('li'); li.innerHTML = f; ul.appendChild(li); });
+    box.appendChild(ul);
+  }
+  var hover = { el: null, key: null };
+  var brush = { key: null };
+
+  function renderBrush() {
+    var id = M._lab_map_tile(), key = [id, SPRITE_KEY()].join();
+    if (brush.key === key) return;
+    brush.key = key;
+    var box = $('map-brush');
+    box.innerHTML = '';
+    var cv = el('canvas', 'cell-pic small');
+    L.paint(cv, tiles(), palette(), id, 1, 1, 3, -1);
+    box.appendChild(cv);
+    var mk = L.marker(id);
+    box.appendChild(el('span', null, 'Painting with tile ' + id + ' · ' + name(id) + (mk ? ' (a marker)' : '') +
+      '. Open the tile sheet (the last icon at the top right, or press Shift) to pick another.'));
+  }
+
+  // what changed, level by level
+  function changes() {
+    var a = orig.map, b = map(), groups = {};
+    for (var i = 0; i < CELLS; i++) {
+      if (a[i] === b[i]) continue;
+      var x = i % W, y = (i - x) / W, l = levelAt(x, y), k = l ? l.name : '';
+      (groups[k] = groups[k] || []).push(i);
+    }
+    return Object.keys(groups).map(function (k) {
+      var cells = groups[k], xs = [], ys = [];
+      cells.forEach(function (i) { var x = i % W; if (xs.indexOf(x) < 0) xs.push(x); var y = (i - x) / W; if (ys.indexOf(y) < 0) ys.push(y); });
+      xs.sort(function (p, q) { return p - q; });
+      ys.sort(function (p, q) { return p - q; });
+      var shown = cells.slice(0, 3).map(function (i) {
+        var x = i % W;
+        return '(' + x + ', ' + (i - x) / W + '): ' + name(a[i]) + ' → ' + name(b[i]);
+      });
+      if (cells.length > 3) shown.push('and ' + plural(cells.length - 3, 'more cell'));
+      return { name: k, cells: cells, text: (k || 'Outside the levels') + ': ' + plural(cells.length, 'cell') + ' changed, ' +
+        (xs.length > 1 || ys.length > 1 ? 'between cells ' + xs[0] + ' and ' + xs[xs.length - 1] + ' across and ' + ys[0] + ' and ' +
+          ys[ys.length - 1] + ' down' : 'at cell (' + xs[0] + ', ' + ys[0] + ')') + '. For example ' + shown.join('; ') };
+    });
+  }
+
+  function renderChanges() {
+    var list = changes(), key = JSON.stringify(list.map(function (c) { return c.text; }));
+    if (key === MAP.view.changes) return;
+    MAP.view.changes = key;
+    var box = $('map-changes');
+    box.innerHTML = '';
+    if (!list.length) {
+      box.appendChild(el('p', 'hint', 'Nothing yet. Click on the map to paint with the tile under Painting with; ' +
+        'open the tile sheet to pick another. Then ▶ try it in the game: ' + (CODE.firstScreen
+          ? 'this lesson\'s game draws the first screen of the map (cells 0-29 across, 0-16 down), so paint there.'
+          : 'the game draws the map you made.')));
+      return;
+    }
+    var ul = el('ul', 'changes');
+    list.forEach(function (c) {
+      var li = el('li', null, c.text + ' ');
+      li.appendChild(button('btn small', 'Reset', function () {
+        var m = map();
+        c.cells.forEach(function (i) { m[i] = orig.map[i]; });
+        L.refresh();
+      }));
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+  }
+
+  // tiles and flags change what the map shows too
+  var spriteKey = 0;
+  function SPRITE_KEY() { return spriteKey; }
+  function dataKey() {
+    var m = map(), t = tiles(), p = palette(), f = flags(), h = 0, k;
+    for (k = 0; k < m.length; k++) h = (h * 31 + m[k]) | 0;
+    var s = 0;
+    for (k = 0; k < t.length; k++) s = (s * 31 + t[k]) | 0;
+    for (k = 0; k < p.length; k++) s = (s * 31 + p[k]) | 0;
+    for (k = 0; k < f.length; k++) s = (s * 31 + f[k]) | 0;
+    spriteKey = s;
+    return h + ':' + s;
+  }
+
+  function update(slow, screen) {
+    var view = MAP.view;
+    if (slow) {
+      var key = dataKey();
+      if (key !== view.data) {
+        view.data = key;
+        drawMinimap();
+        renderChanges();
+        hover.key = null;
+      }
+      // a click paints without moving the mouse: say what the cell holds now
+      if (hover.at) MAP.pointer(hover.at[0], hover.at[1], screen);
+    }
+    var x = M._lab_map_x(), y = M._lab_map_y();
+    var vkey = [x, y, screen].join();
+    if (vkey !== view.scroll) {
+      view.scroll = vkey;
+      place($('mm-view'), x / 8, y / 8, 30, 17);
+      var l = levelAt(Math.floor(x / 8) + 15, Math.floor(y / 8) + 8);
+      $('map-where').textContent = screen === L.WORLD
+        ? 'The world map is open: click a place in it to go there.'
+        : 'The editor shows cells ' + Math.floor(x / 8) + '-' + (Math.floor(x / 8) + 29) + ' across and ' + Math.floor(y / 8) + '-' +
+          (Math.floor(y / 8) + 16) + ' down' + (l ? ', in ' + l.name : '') + '.';
+    }
+    renderBrush();
+  }
+
+  var MAP = {
+    id: 3, tab: 'Map',
+    usesTab: true,                  // Tab: the world view
+    parts: function (screen) { return screen === L.WORLD ? WORLD_PARTS : PARTS; },
+    // over the map: the cell, in a line under the screen; over the open tile sheet: the sheet
+    partAt: function (sx, sy, screen) {
+      if (screen !== 3 || sy < 8) return null;
+      if (M._lab_map_sheet()) {
+        return sx >= 111 ? { name: 'Tile sheet', text: 'click a tile to paint with it; drag across several to paint a block of them. Shift (or the icon at the top right) closes it.' } : null;
+      }
+      var c = cellAt(sx, sy), id = map()[c[1] * W + c[0]], l = levelAt(c[0], c[1]), f = flags()[id], what = [];
+      for (var b = 0; b < 8; b++) {
+        var m = (f & (1 << b)) ? flagMeaning(b) : null;
+        if (m) what.push(m[0] + ': ' + m[1]);
+      }
+      var mk = (CODE.spawn || {})[id];
+      return { name: 'Map cell (' + c[0] + ', ' + c[1] + ')', text: (id ? 'tile ' + id + ' · ' + name(id) : 'empty') +
+        (l ? ', in ' + l.name : '') + (mk ? '. A marker (see Under the mouse)' : '') + (what.length ? '. ' + what.join('; ') : '') + '.' };
+    },
+    save: { label: 'Save my map', file: 'my-map.png', what: 'your map',
+      parts: [['map', 'the map'], ['tiles', 'the tiles it is made of'], ['flags', 'their flags']] },
+    hint: function (touch, screen) {
+      if (screen === L.WORLD) return 'This is the world map: the whole map, small. Click a place to go there; Tab goes back.';
+      return touch
+        ? 'Tap a level in the list below to go there. <b>What\'s on the screen</b>, further down, says what each part of the editor does. Painting works best with a mouse.'
+        : 'Point at the map to find out what is in a cell. Pick a level below to go there; open the tile sheet (the last icon at the top right) to pick a tile, then click to paint.';
+    },
+    // the cell under the mouse, said in words
+    pointer: function (sx, sy, screen) {
+      var box = $('map-hover');
+      var off = sx === null || screen !== 3 || sy < 8 || M._lab_map_sheet();
+      box.hidden = off;
+      $('map-hover-hint').hidden = !off;
+      hover.at = sx === null ? null : [sx, sy];
+      if (off) { hover.key = null; return; }
+      hover.el = $('map-hover-cell');
+      var c = cellAt(sx, sy);
+      renderCell(hover, c[0], c[1]);
+    },
+    init: function () {
+      M = L.M();
+      orig.map = map().slice();
+      MAP.available = false;
+      for (var i = 0; i < CELLS; i++) if (orig.map[i]) { MAP.available = true; break; }
+      findArea();
+    },
+    build: function (panels) {
+      panels.innerHTML =
+        '<section class="panel wide"><h2>The cart\'s levels</h2>' +
+        '<p class="hint">Click a level to go there in the map editor' + (CODE.play ? ', or play it.' : '.') + '</p>' +
+        '<div id="level-list" class="levels"></div>' +
+        '<div class="minimap" id="minimap-box"><canvas id="minimap" width="240" height="136" ' +
+        'aria-label="The whole map: click to go there"></canvas></div>' +
+        '<p class="hint when-editing" id="map-where"></p></section>' +
+        '<section class="panel"><h2>Under the mouse</h2>' +
+        '<div id="map-hover" hidden><div id="map-hover-cell" class="cell"></div></div>' +
+        '<p class="hint" id="map-hover-hint">Point at the map in the editor: this says what is in that cell.</p>' +
+        '<div class="brush" id="map-brush"></div></section>' +
+        '<section class="panel"><h2>What you changed</h2><div id="map-changes"></div></section>';
+      buildLevels();
+    },
+    start: function () {
+      if (LEVELS.length) M._lab_map_scroll(LEVELS[0].x * 8, LEVELS[0].y * 8);
+      // the editor starts with tile 0, which paints empty cells: start with grass instead
+      var t = L.tileEmpty(tiles(), 2) ? 1 : 2;
+      if (!L.tileEmpty(tiles(), t)) M._lab_map_set_tile(t);
+    },
+    update: update,
+    keep: function () { return [M._lab_map_x(), M._lab_map_y()]; },
+    restore: function (k) { M._lab_map_scroll(k[0], k[1]); }
+  };
+
+  L.editor(MAP);
+})(LAB);
+LAB.start();
+</script>
+</body>
+</html>

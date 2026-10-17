@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- cover: the canvas goes under the notch and the home bar, and the
+         player insets its own controls by what the safe areas report -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+    <title>Pip&#x27;s Peak</title>
+
+    <style type="text/css">
+        html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #1a1c2c; }
+
+        /* The canvas fills what the browser leaves to the page; the player
+           fills that itself, so nothing here has to know about the notch. */
+        #canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            image-rendering: pixelated;
+            touch-action: none;
+        }
+
+        /* The gate that starts the player — and the gesture the browser wants
+           before it lets the page make a sound. */
+        #game-frame {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font: 44px monospace;
+            cursor: pointer;
+            background: #1a1c2c;
+        }
+
+        .modal { display: none; position: fixed; z-index: 1; padding-top: 100px; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, .4); }
+        .modal-content { color: #333c57; position: relative; background-color: #fefefe; margin: auto; padding: 2px 16px; border: 1px solid #888; width: 500px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, .2), 0 6px 20px 0 rgba(0, 0, 0, .19); }
+        .close { color: #000; float: right; font-size: 28px; font-weight: 700; }
+        .close:focus, .close:hover { color: #000; text-decoration: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <!-- The one page: the site's player and, with two things rewritten by
+         the client, the index.html of every exported game — the title below
+         becomes the game's name, and the empty argument list of the Module
+         object becomes the cartridge it embeds. Do not write that empty
+         list anywhere else in this file: the client patches the first one
+         it finds, and a mention in a comment would take its place.
+
+         The on-screen controls are the player's own now, drawn into the
+         canvas, so the page carries none. -->
+
+    <canvas id="canvas" tabindex="0" oncontextmenu="event.preventDefault()" onmousedown="window.focus()"></canvas>
+
+    <div id="game-frame">- CLICK TO PLAY -</div>
+
+    <div id="add-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times</span>
+            <p>Select a file to add to the computer</p>
+            <p><input type="file" id="upload-input"></p>
+        </div>
+    </div>
+
+    <script>
+  function cartArg() {
+    var m = /[?&]cart=(lesson\d\d|ch-\d\d-[a-z0-9-]+)(?:&|$)/.exec(location.search);
+    return (m ? m[1] : 'lesson20') + '.tic';
+  }
+  var fetchOrig = window.fetch;
+  window.fetch = function(url, opts) {
+    if (typeof url === 'string' && /\.tic$/.test(url)) url = url.replace(/\.tic$/, '.png');
+    return fetchOrig.call(this, url, opts);
+  };
+  // embedded in the course page: the arrow keys and space play the game, never scroll the page
+  window.addEventListener('keydown', function(e) {
+    if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.key) >= 0) e.preventDefault();
+  });
+</script>
+<script type="text/javascript">
+        var Module = {canvas: document.getElementById('canvas'), arguments: [cartArg()]};
+
+        const gameFrame = document.getElementById('game-frame')
+
+        gameFrame.addEventListener('click', function() {
+            let scriptTag = document.createElement('script'), // create a script tag
+            firstScriptTag = document.getElementsByTagName('script')[0]; // find the first script tag in the document
+            scriptTag.src = 'tic80.js'; // set the source of the script to your script
+            firstScriptTag.parentNode.insertBefore(scriptTag, firstScriptTag); // append the script to the DOM
+            this.remove()
+            // Focus canvas to ensure keyboard events are routed to the game
+            document.getElementById('canvas').focus()
+        });
+    </script>
+<script>
+  // The player keeps its options in options.json in its IndexedDB folder, read when it
+  // starts: write "crt": false there just before it does (the folder is mounted and
+  // loaded by then). 62c24e5 is the build's version hash (TIC-80 1.3.1).
+  {
+    Module.onRuntimeInitialized = function() {
+      var start = Module._sokol_start;
+      Module._sokol_start = function() {
+        try {
+          var dir = '/com.nesbox.tic/TIC-80/.local/62c24e5/', path = dir + 'options.json', opts = {};
+          FS.mkdirTree(dir);
+          try { opts = JSON.parse(FS.readFile(path, {encoding: 'utf8'})); } catch (e) {}
+          opts.crt = false;
+          FS.writeFile(path, JSON.stringify(opts));
+        } catch (e) {}
+        return start.apply(this, arguments);
+      };
+    };
+  }
+  if (/[?&]autostart=1(?:&|$)/.test(location.search)) document.getElementById('game-frame').click();
+</script>
+</body>
+</html>
