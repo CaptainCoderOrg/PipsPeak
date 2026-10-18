@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Silkscreen&display=swap">
 <style>
-/* The Sound Lab: TIC-80's editor on top, the teaching panels under it. The
+/* The labs: TIC-80's editor and the teaching panels (wide, tall, or in the page). The
    course's own colors and fonts (coursekit/site.css), light and dark. */
 :root {
   --bg: #eef1f7;
@@ -283,11 +283,26 @@ details.panel[open] > summary { margin-bottom: 0.5rem; }
 .chip .tag { font: 700 0.65rem var(--font-body); letter-spacing: 0.02em; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 0.25rem; }
 .chip[aria-pressed="true"] .tag { color: inherit; border-color: currentColor; }
 .swatch[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+
+/* Filling a window (lab-core.js fit()): the course page's dialog, or a window of its own.
+   Wide: TIC-80 on the left, the panels on the right; tall: TIC-80 on top, the panels
+   under it. The panels scroll on their own; TIC-80 stays in view. */
+html.fill, html.fill body { height: 100%; overflow: hidden; }
+html.fill .lab { max-width: none; height: 100%; padding: 0 16px; display: grid; column-gap: 16px; }
+.lab.tall { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr); }
+.lab.wide { grid-template-columns: var(--screen-w) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+.lab.wide .bar { grid-column: 1 / -1; }
+.lab.tall .stage { width: var(--screen-w); max-width: 100%; justify-self: center; }
+.lab.wide .stage { min-height: 0; overflow-y: auto; }
+html.fill .side { min-height: 0; overflow-y: auto; padding-bottom: 1rem; container-type: inline-size; }
+@container (max-width: 600px) {
+  .panels, .legend { grid-template-columns: minmax(0, 1fr); }
+}
 </style>
 </head>
 <body>
 <main class="lab">
-  <header class="bar">
+  <header class="bar" id="bar">
     <h1 id="title">TIC-80 Lab</h1>
     <div class="tabs" id="tabs" role="tablist" aria-label="Editor"></div>
     <div class="actions">
@@ -297,32 +312,36 @@ details.panel[open] > summary { margin-bottom: 0.5rem; }
     </div>
   </header>
 
-  <p class="touch-note" id="touch-note" hidden>On a phone or tablet you can look around, listen and tap the lists below;
-    drawing, painting and typing work best with a mouse and keyboard.</p>
-
-  <section class="panel saved-panel" id="save-help" hidden>
-    <h2>Your changes in your game</h2>
-    <div id="save-text"></div>
-    <button type="button" class="btn small" id="save-close">OK, got it</button>
-  </section>
-
-  <div class="screen" id="screen">
-    <canvas id="canvas" tabindex="0" aria-label="TIC-80" oncontextmenu="event.preventDefault()"></canvas>
-    <div class="loading" id="loading">Starting TIC-80…</div>
+  <div class="stage" id="stage">
+    <div class="screen" id="screen">
+      <canvas id="canvas" tabindex="0" aria-label="TIC-80" oncontextmenu="event.preventDefault()"></canvas>
+      <div class="loading" id="loading">Starting TIC-80…</div>
+    </div>
+    <p class="pointing" id="pointing"></p>
+    <p class="away" id="away" hidden>
+      <span id="away-text"></span>
+      <button type="button" class="btn small" id="back">Back</button>
+    </p>
   </div>
-  <p class="pointing" id="pointing"></p>
-  <p class="away" id="away" hidden>
-    <span id="away-text"></span>
-    <button type="button" class="btn small" id="back">Back</button>
-  </p>
 
-  <div id="editor-panels"></div>
+  <div class="side" id="side">
+    <p class="touch-note" id="touch-note" hidden>On a phone or tablet you can look around, listen and tap the lists below;
+      drawing, painting and typing work best with a mouse and keyboard.</p>
 
-  <div class="panels">
-    <details class="panel wide" id="legend-box">
-      <summary><h2>What's on the screen</h2><span class="hint">every part of the editor, explained</span></summary>
-      <ul class="legend" id="legend"></ul>
-    </details>
+    <section class="panel saved-panel" id="save-help" hidden>
+      <h2>Your changes in your game</h2>
+      <div id="save-text"></div>
+      <button type="button" class="btn small" id="save-close">OK, got it</button>
+    </section>
+
+    <div id="editor-panels"></div>
+
+    <div class="panels">
+      <details class="panel wide" id="legend-box">
+        <summary><h2>What's on the screen</h2><span class="hint">every part of the editor, explained</span></summary>
+        <ul class="legend" id="legend"></ul>
+      </details>
+    </div>
   </div>
 </main>
 
@@ -331,7 +350,9 @@ details.panel[open] > summary { margin-bottom: 0.5rem; }
 // The labs: TIC-80's own editors (our web build of 1.3.1 with the lab's functions:
 // tic80/build.sh lab, tic80/LAB.md) and, around them, panels that name what the
 // cart holds, show what is happening and what changed, and put things back.
-//   lab.html?cart=lesson15&mode=sfx|music|sprite|palette|map[&sprite=N]
+//   lab.html?cart=lesson15&mode=sfx|music|sprite|palette|map[&sprite=N][&fill=1][&handoff=1]
+// fill=1: the course page shows it full screen (a dialog), not growing in the page;
+// handoff=1: start from the cart the page hands over (the lab moved between windows).
 // This file is the shared part. lab-sound.js, lab-sprite.js and lab-map.js each
 // add editors with LAB.editor({...}), and LAB.start() runs last.
 var LAB = (function () {
@@ -352,6 +373,17 @@ var LAB = (function () {
   var OWN = (DATA.cartNames || {})[CART];
   if (OWN) ['sfx', 'tracks', 'patterns'].forEach(function (k) { if (OWN[k]) DATA[k] = OWN[k]; });
   var IN_PAGE = window.parent !== window;
+  // the lab fills its window (a dialog over the course page, a window of its own) and lays
+  // itself out by its width; in the page's column (phones) it grows as tall as it is
+  var FILL = !IN_PAGE || params.get('fill') === '1';
+  var KEY = 'lab-' + CART + '-' + MODE;      // the lab's name for the course page (lab-embed.js)
+  // the course page that opened it: the page it is in, or the window that opened its window
+  var COURSE = (function () {
+    try {
+      var w = IN_PAGE ? window.parent : window.opener;
+      return w && w.labEmbed ? w : null;
+    } catch (e) { return null; }       // another site's page
+  })();
   var TOUCH = Boolean(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
   var GAME = 4, WORLD = 5;                   // lab_editor(): the cart running, the world view
   if (IN_PAGE) document.documentElement.classList.add('in-page');
@@ -414,6 +446,15 @@ var LAB = (function () {
         return start.apply(this, arguments);
       };
     }
+  };
+
+  // The console asks the site it runs on for a newer TIC-80 (tic80.com's /json?fn=version;
+  // on the course's site a 404). The labs are 1.3.1 on purpose: the answer is "none".
+  var xhrOpen = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function (method, url) {
+    var args = Array.prototype.slice.call(arguments);
+    if (/\/json\?fn=version$/.test(String(url))) args[1] = 'data:application/json,{}';
+    return xhrOpen.apply(this, args);
   };
 
   function heap() { return M.HEAPU8; }
@@ -786,13 +827,94 @@ var LAB = (function () {
   });
   $('save-close').addEventListener('click', function () { $('save-help').hidden = true; });
 
-  // The course page sizes the frame to fit the lab.
-  if (IN_PAGE && window.ResizeObserver) {
-    var lab = document.querySelector('.lab'), sent = 0;
+  // ---------------------------------------------------------------------------
+  // The layout. Filling a window: wide (TIC-80 on the left, as large as the height allows,
+  // the panels on the right) or tall (TIC-80 on top, the panels under it); the panels
+  // scroll on their own. TIC-80's picture is a whole number of screen pixels a pixel.
+  // A window too small for either (a phone), or the lab in the page's column: the page
+  // scrolls, and in the page the course page sizes the frame to fit the lab.
+  // ---------------------------------------------------------------------------
+  var lab = document.querySelector('.lab'), layout = '';
+  function fit() {
+    var W = document.documentElement.clientWidth, H = window.innerHeight;
+    var bar = $('bar').getBoundingClientRect().height, below = 84;  // the pointing line under it
+    // whole device pixels for each of TIC-80's: 256 x 144 with its border
+    var dpr = window.devicePixelRatio || 1;
+    function scale(maxW, maxH) {
+      var s = Math.min(maxW / 256, maxH / 144) * dpr;
+      return s >= 2 ? Math.floor(s) : s;
+    }
+    var wide = scale(W - 32 - 16 - 340, H - bar - below - 8), tall = scale(W - 32, (H - bar - below) * 0.6);
+    // wide from about 1100 pixels, unless TIC-80 would be smaller than stacked
+    var next = !FILL || W < 700 || H < 460 ? 'flow' : W >= 1100 && wide >= tall ? 'wide' : 'tall';
+    if (next !== layout) {
+      layout = next;
+      document.documentElement.classList.toggle('fill', next !== 'flow');
+      lab.classList.toggle('wide', next === 'wide');
+      lab.classList.toggle('tall', next === 'tall');
+    }
+    if (next === 'flow') { lab.style.removeProperty('--screen-w'); return; }
+    lab.style.setProperty('--screen-w', Math.max(256, Math.floor(256 * (next === 'wide' ? wide : tall)) / dpr) + 'px');
+  }
+  fit();
+  window.addEventListener('resize', fit);
+  if (window.ResizeObserver) new ResizeObserver(function () { fit(); }).observe($('bar'));
+
+  if (IN_PAGE && !FILL && window.ResizeObserver) {
+    var sent = 0;
     new ResizeObserver(function () {
       var h = Math.ceil(lab.getBoundingClientRect().height);
       if (h !== sent) { sent = h; window.parent.postMessage({ type: 'lab-height', height: h }, '*'); }
     }).observe(lab);
+  }
+
+  // The course page hides the lab's dialog (the lab stays as it is): quiet while hidden.
+  window.addEventListener('message', function (e) {
+    var msg = e.data;
+    if (e.source !== window.parent || !msg || !M) return;
+    if (msg.type === 'lab-pause') {
+      M._lab_sfx_play(0);
+      M._lab_music_stop();
+      // the game may still be playing: the sound goes off (sokol_audio turns a suspended
+      // context back on by itself, through onstatechange, so that waits until it shows again)
+      var ctx = window.Module._saudio_context;
+      if (ctx && ctx.state === 'running') {
+        ctx.labStateChange = ctx.onstatechange;
+        ctx.onstatechange = null;
+        ctx.suspend().catch(function () {});
+      }
+    }
+    if (msg.type === 'lab-resume') {
+      var c = window.Module._saudio_context;
+      if (c && c.labStateChange) { c.onstatechange = c.labStateChange; c.labStateChange = null; }
+      resumeAudio();
+    }
+  });
+
+  // ---------------------------------------------------------------------------
+  // Moving between windows: the course page takes the cart as it is now (with the
+  // changes) from one copy of the lab and hands it to the next, which starts from it.
+  // ---------------------------------------------------------------------------
+  function handoff() {
+    if (!M || !original.cart || $('reset-all').disabled) return null;
+    var size = withBytes(original.cart, function (p, n) { return M._lab_save_png(p, n); });
+    return {
+      cart: heap().slice(M._lab_saved(), M._lab_saved() + size),
+      editor: state.last,
+      kept: FAMILY.filter(inLab).map(function (id) { return [id, editors[id].keep ? editors[id].keep() : null]; })
+    };
+  }
+  function takeHandoff() {
+    if (params.get('handoff') !== '1' || !COURSE) return null;
+    try { return COURSE.labEmbed.take(KEY); } catch (e) { return null; }
+  }
+  // In a window of its own: the course page learns it is here, also after it reloads.
+  if (!IN_PAGE && window.opener) {
+    setInterval(function () {
+      try {
+        if (window.opener && !window.opener.closed && window.opener.labEmbed) window.opener.labEmbed.attach(KEY, window);
+      } catch (e) { /* the opener went somewhere else */ }
+    }, 1000);
   }
 
   // ---------------------------------------------------------------------------
@@ -820,7 +942,14 @@ var LAB = (function () {
     if (first < 0) { $('loading').textContent = 'This cart has nothing for this lab yet.'; return; }
     state.last = first;
     FAMILY.forEach(function (id) { if (inLab(id) && editors[id].start) editors[id].start(params); });
-    open(first, false);
+    var given = takeHandoff();
+    if (given) {
+      // the editors keep this lesson's cart as the original: the changes show as changes
+      loadCart(new Uint8Array(given.cart));
+      given.kept.forEach(function (k) { if (inLab(k[0]) && editors[k[0]].restore) editors[k[0]].restore(k[1]); });
+      if (inLab(given.editor)) state.last = given.editor;
+    }
+    open(state.last, false);
     $('loading').hidden = true;
     $('reset-all').disabled = $('save').disabled = $('try').disabled = false;
     requestAnimationFrame(frame);
@@ -830,8 +959,11 @@ var LAB = (function () {
     $('title').textContent = TITLES[MODE];
     $('touch-note').hidden = !TOUCH;
     document.title = TITLES[MODE];
+    var consoleShown = 0;
     (function wait() {
-      if (window.Module._lab_ready && window.Module._lab_ready()) { cartBytes.then(begin, function () {}); return; }
+      // The console loads TIC-80's demo cart the first time it shows (console.c, tick):
+      // let it, before the lesson's cart goes in, or Esc to the console later would.
+      if (window.Module._lab_ready && window.Module._lab_ready() && consoleShown++ > 4) { cartBytes.then(begin, function () {}); return; }
       setTimeout(wait, 50);
     })();
     cartBytes.catch(function () { $('loading').textContent = 'The cart did not load. Try opening the lab again.'; });
@@ -848,6 +980,7 @@ var LAB = (function () {
     pixel: pixel, color: color, hex: hex, paint: paint, tileEmpty: tileEmpty, flagMeaning: flagMeaning, marker: marker,
     state: state, editor: editor, open: open, ensure: ensure, run: run, refresh: refresh, highlight: highlight,
     relegend: function () { buildLegend(); point(state.pointed); },
+    handoff: handoff, KEY: KEY,
     start: start
   };
 })();

@@ -429,6 +429,41 @@ details.example .shot img { max-width: 480px; }
 .lab-embed .screen { max-width: 720px; }
 .lab-embed .screen.running { max-width: none; aspect-ratio: auto; background: transparent; border-radius: 0; overflow: visible; }
 .lab-embed .screen.running iframe { position: static; display: block; width: 100%; height: 1150px; }
+/* on a big screen: full screen over the lesson (lab-embed.js); the page doesn't scroll under it */
+html { scrollbar-gutter: stable; }
+html.lab-open { overflow: hidden; }
+.lab-dialog {
+  position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none;
+  margin: 0; padding: 0; border: 0; background: var(--bg); color: var(--ink);
+}
+.lab-dialog[open] { display: flex; flex-direction: column; }
+.lab-dialog::backdrop { background: rgba(20, 21, 31, 0.6); }
+.lab-dialog-bar {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 16px;
+  border-bottom: 1px solid var(--line); background: var(--surface); font-size: 0.9rem;
+}
+.lab-dialog-title { font-weight: 700; margin-right: auto; }
+.lab-dialog-note { color: var(--new); }
+.lab-dialog-bar button {
+  font: 700 0.9rem var(--font-body); color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px; padding: 0.25rem 0.7rem; cursor: pointer;
+}
+.lab-dialog-bar button:hover { border-color: var(--accent); }
+.lab-dialog-frames { flex: 1; min-height: 0; position: relative; }
+.lab-dialog-frames iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+.lab-dialog-frames iframe[hidden] { display: none; }
+/* the lab is in a window of its own */
+.lab-embed.popped .play-btn { display: none; }
+.lab-elsewhere {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.25rem; padding: 1rem; text-align: center; background: rgba(20, 21, 31, 0.82); color: #f4f4f4;
+}
+.lab-elsewhere p { margin: 0.2rem 0; }
+.lab-elsewhere button {
+  font: 700 0.95rem var(--font-body); border: 0; border-radius: 6px; padding: 0.45rem 0.9rem; cursor: pointer;
+  background: var(--sun); color: var(--sun-ink); margin: 0.2rem;
+}
+.lab-elsewhere button.lab-here { background: #f4f4f4; color: #1a1c2c; }
 
 /* pixel art: pictures from pixel rows, side by side */
 .px-fig { display: inline-block; vertical-align: top; margin: 0.6rem 1rem 0.6rem 0; max-width: 100%; }
@@ -20709,6 +20744,8 @@ SPAWN = {
     if (!btn) return;
     document.querySelectorAll('.play-embed').forEach(stop);
     var fig = btn.closest('.play-embed');
+    // a lab opens full screen, or in its own window (lab-embed.js); on a phone, here
+    if (fig.classList.contains('lab-embed') && window.labEmbed && window.labEmbed.open(fig)) return;
     var frame = document.createElement('iframe');
     frame.src = fig.getAttribute('data-src');
     frame.title = btn.textContent.replace('▶', '').trim();
@@ -20786,22 +20823,242 @@ SPAWN = {
   dialog.addEventListener('close', function () { dialog.querySelector('img').src = ''; });
 })();
 
-// A lab (lab/lab.html: sound, sprites, map) is as tall as it says it is, and hands this page the
-// cart it saved: offered through the viewer's downloads in the claude.ai viewer, as a
-// plain download elsewhere. Shared: site.py adds it to site.js, pages.py to course.js.
+// The labs (lab/lab.html: sound, sprites, map) in the course page. Shared: site.py adds it to
+// site.js, pages.py to course.js; their ▶ button asks labEmbed.open(figure) first.
+// - On a big screen a lab opens full screen over the lesson (a dialog). Closing it hides it:
+//   the lab stays as it was (sound off) for the next time it opens.
+// - "Pop out ⧉" moves it to a window of its own, with the changes. While it is there the
+//   lesson shows "open in another window": Bring it back (to the front), or Use it here
+//   instead (the changes come back with it). The window finds this page again after a reload.
+// - On a phone the lab opens in the page's column (site.js / course.js), as tall as it says.
+// - Save: the lab hands this page the cart it saved, offered through the viewer's downloads
+//   in the claude.ai viewer, as a plain download elsewhere.
 (function () {
   var downloads = null;
   if (window.claude && window.claude.use) {
     window.claude.use('downloads').then(function (d) { downloads = d; });
   }
+  var KEPT = 3;               // labs kept alive behind a closed dialog (each is a TIC-80)
+  var kept = [];              // {key, frame}, the last one shown last
+  var popups = {};            // key -> the lab's own window
+  var given = {};             // key -> the lab as it was, for the next copy of it to start from
+  var dialog = null, shown = null;
+  // the course in someone else's frame (the claude.ai viewer): no windows of its own
+  var FRAMED = window.parent !== window;
+  var FAR = 'Chrome brings the window to the front; Firefox and Safari may only make it flash.';
+
+  function query(fig) { return new URLSearchParams(fig.getAttribute('data-src').split('?')[1] || ''); }
+  function keyOf(fig) { var q = query(fig); return 'lab-' + q.get('cart') + '-' + q.get('mode'); }
+  function titleOf(fig) { return fig.querySelector('.play-btn').textContent.replace(/^▶\s*Open the\s*/, ''); }
+  function figures(key) {
+    return Array.prototype.filter.call(document.querySelectorAll('.lab-embed'), function (f) { return keyOf(f) === key; });
+  }
+  function src(fig, handoff) { return fig.getAttribute('data-src') + '&fill=1' + (handoff ? '&handoff=1' : ''); }
+  function big() { return window.innerWidth >= 760 && window.innerHeight >= 520; }
+  function remember(key, on) {
+    try { if (on) sessionStorage.setItem(key, '1'); else sessionStorage.removeItem(key); } catch (e) { /* private mode */ }
+  }
+  function remembered(key) { try { return sessionStorage.getItem(key) === '1'; } catch (e) { return false; } }
+  // the lab as it is now in a window (its changes, the editor it shows), or null
+  function takeFrom(win) { try { return win.LAB ? win.LAB.handoff() : null; } catch (e) { return null; } }
+
+  // ---- the dialog ----
+  function makeDialog() {
+    dialog = document.createElement('dialog');
+    dialog.className = 'lab-dialog';
+    dialog.innerHTML = '<div class="lab-dialog-bar"><span class="lab-dialog-title"></span>' +
+      '<span class="lab-dialog-note" hidden></span>' +
+      (FRAMED ? '' : '<button type="button" class="lab-popout" title="The lab in a window of its own, beside the lesson">Pop out ⧉</button>') +
+      '<button type="button" class="lab-close" title="Back to the lesson (the lab stays as it is)">Close ✕</button></div>' +
+      '<div class="lab-dialog-frames"></div>';
+    document.body.appendChild(dialog);
+    dialog.querySelector('.lab-close').addEventListener('click', function () { dialog.close(); });
+    if (!FRAMED) dialog.querySelector('.lab-popout').addEventListener('click', function () { popOut(shown); });
+    // Esc closes it only from here: while TIC-80 has the keyboard, its keys are TIC-80's
+    dialog.addEventListener('close', function () {
+      document.documentElement.classList.remove('lab-open');
+      if (!shown) return;
+      var k = kept.filter(function (x) { return x.key === shown.key; })[0];
+      if (k) k.frame.contentWindow.postMessage({ type: 'lab-pause' }, '*');
+      var btn = shown.fig.querySelector('.play-btn');
+      shown = null;
+      if (btn && !btn.hidden) btn.focus({ preventScroll: true });
+    });
+  }
+  function frameFor(fig, key) {
+    var k = kept.filter(function (x) { return x.key === key; })[0];
+    if (k) {
+      kept.splice(kept.indexOf(k), 1);
+      kept.push(k);
+      return k.frame;
+    }
+    var frame = document.createElement('iframe');
+    frame.src = src(fig, Boolean(given[key]));
+    frame.title = titleOf(fig);
+    frame.allow = 'autoplay; fullscreen; gamepad';
+    dialog.querySelector('.lab-dialog-frames').appendChild(frame);
+    kept.push({ key: key, frame: frame });
+    while (kept.length > KEPT) kept.shift().frame.remove();
+    return frame;
+  }
+  function drop(key) {
+    kept = kept.filter(function (x) {
+      if (x.key === key) x.frame.remove();
+      return x.key !== key;
+    });
+  }
+  function showModal(fig) {
+    if (!dialog) makeDialog();
+    var key = keyOf(fig), frame = frameFor(fig, key);
+    kept.forEach(function (x) { x.frame.hidden = x.frame !== frame; });
+    shown = { key: key, fig: fig };
+    dialog.querySelector('.lab-dialog-title').textContent = titleOf(fig);
+    dialog.querySelector('.lab-dialog-note').hidden = true;
+    document.documentElement.classList.add('lab-open');
+    if (!dialog.open) dialog.showModal();
+    frame.contentWindow.postMessage({ type: 'lab-resume' }, '*');
+    frame.focus();
+  }
+
+  // ---- its own window ----
+  function features() {
+    var w = Math.min(1440, screen.availWidth || 1440), h = Math.min(920, screen.availHeight || 920);
+    return 'popup,width=' + w + ',height=' + h;
+  }
+  function popped(key, win) {
+    if (win) popups[key] = win; else delete popups[key];
+    mark(key, Boolean(win));
+  }
+  // the lesson's view of a lab that is in another window
+  function mark(key, on) {
+    remember(key, on);
+    figures(key).forEach(function (fig) {
+      fig.classList.toggle('popped', on);
+      var note = fig.querySelector('.lab-elsewhere');
+      if (on && !note) {
+        note = document.createElement('div');
+        note.className = 'lab-elsewhere';
+        note.innerHTML = '<p>The ' + titleOf(fig) + ' is open in another window.</p><p>' +
+          '<button type="button" class="lab-back" title="' + FAR + '">Bring it back</button> ' +
+          '<button type="button" class="lab-here">Use it here instead</button></p>';
+        fig.querySelector('.screen').appendChild(note);
+      }
+      if (!on && note) note.remove();
+    });
+  }
+  // a window that is gone is noticed within a second
+  setInterval(function () {
+    Object.keys(popups).forEach(function (key) { if (popups[key].closed) popped(key, null); });
+  }, 1000);
+
+  function popOut(at) {
+    if (!at) return;
+    var key = at.key, fig = at.fig;
+    var k = kept.filter(function (x) { return x.key === key; })[0];
+    var now = k ? takeFrom(k.frame.contentWindow) : null;
+    if (now) given[key] = now;
+    var win = window.open(src(fig, Boolean(now)), key, features());
+    if (!win) {
+      delete given[key];
+      var note = dialog.querySelector('.lab-dialog-note');
+      note.textContent = 'The browser didn\'t open the window (it blocks pop-ups here).';
+      note.hidden = false;
+      return;
+    }
+    shown = null;          // the dialog closes without handing focus back: it went to the window
+    dialog.close();
+    drop(key);             // one copy at a time: the lab is in the window now
+    popped(key, win);
+    win.focus();
+  }
+  // Bring it back: the window we have, or, after this page reloaded, the one with its name
+  // (window.open with no address finds it without loading it again; a new one is empty)
+  function bringBack(fig) {
+    var key = keyOf(fig), win = popups[key];
+    if (!win || win.closed) {
+      win = window.open('', key, features());
+      if (!win) return;
+      var empty = true;
+      try { empty = win.location.href === 'about:blank'; } catch (e) { empty = false; }
+      if (empty) win.location.replace(src(fig, false));
+      popped(key, win);
+    }
+    win.focus();
+  }
+  // Use it here instead: the window's lab, with its changes, comes back into the dialog
+  function useHere(fig) {
+    var key = keyOf(fig), win = popups[key];
+    if (!win || win.closed) {
+      win = remembered(key) ? window.open('', key) : null;
+      var empty = false;
+      try { empty = Boolean(win) && win.location.href === 'about:blank'; } catch (e) { /* not ours */ }
+      if (empty) { win.close(); win = null; }
+    }
+    if (win && !win.closed) {
+      var now = takeFrom(win);
+      if (!now && !window.confirm('Close the other window? Changes you made there and haven\'t saved are lost.')) return;
+      if (now) given[key] = now;
+      win.close();
+    }
+    popped(key, null);
+    drop(key);
+    showModal(fig);
+  }
+
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('.lab-elsewhere button');
+    if (!b) return;
+    var fig = b.closest('.lab-embed');
+    if (b.classList.contains('lab-back')) bringBack(fig); else useHere(fig);
+  });
+  window.addEventListener('hashchange', function () { if (dialog && dialog.open) dialog.close(); });
+
+  // after a reload: the labs that were in windows of their own say so until the window
+  // calls back (attach), or for good if it does
+  document.querySelectorAll('.lab-embed').forEach(function (fig) {
+    var key = keyOf(fig);
+    if (!remembered(key)) return;
+    mark(key, true);         // no handle yet: Bring it back finds the window by its name
+    setTimeout(function () { if (!popups[key]) mark(key, false); }, 4000);
+  });
+
+  window.labEmbed = {
+    // the ▶ button: true when this handled it (the dialog, or the window it is in);
+    // false on a small screen, where the lab opens in the page
+    open: function (fig) {
+      var key = keyOf(fig);
+      if (popups[key] && !popups[key].closed) { popups[key].focus(); return true; }
+      if (fig.classList.contains('popped')) { bringBack(fig); return true; }
+      if (!big()) return false;
+      showModal(fig);
+      return true;
+    },
+    // a lab starting with handoff=1 takes what the last copy of it had
+    take: function (key) {
+      var g = given[key];
+      delete given[key];
+      return g || null;
+    },
+    // a lab in its own window says where it is, every second
+    attach: function (key, win) {
+      if (popups[key] !== win && !win.closed) popped(key, win);
+    }
+  };
+
   window.addEventListener('message', function (e) {
-    var frame = Array.prototype.filter.call(document.querySelectorAll('.lab-embed iframe'), function (f) {
+    var frame = Array.prototype.filter.call(document.querySelectorAll('.lab-embed iframe, .lab-dialog iframe'), function (f) {
       return f.contentWindow === e.source;
     })[0];
     var msg = e.data;
     if (!frame || !msg || typeof msg !== 'object') return;
+    // the page's column: as tall as the lab, give or take a few pixels (a lab that rewraps
+    // when the page's scrollbar comes and goes would otherwise never settle)
     if (msg.type === 'lab-height' && typeof msg.height === 'number') {
-      frame.style.height = Math.max(300, Math.min(4000, Math.ceil(msg.height))) + 'px';
+      var h = Math.max(300, Math.min(4000, Math.ceil(msg.height)));
+      if (!frame.labHeight || Math.abs(h - frame.labHeight) > 6) {
+        frame.labHeight = h;
+        frame.style.height = (h + 6) + 'px';
+      }
     }
     if (msg.type === 'lab-save' && msg.bytes instanceof Uint8Array && /^[a-z-]+\.png$/.test(msg.filename)) {
       // the lab learns how it went: saved, declined, or saving isn't possible here
